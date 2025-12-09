@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  /* Xandeum Brand Colors */
+  --color-xand-dark: #0a0e17;
+  --color-xand-darker: #060911;
+  --color-xand-card: #111827;
+  --color-xand-card-hover: #1a2332;
+  --color-xand-border: #1f2937;
+  --color-xand-teal: #14b8a6;
+  --color-xand-teal-bright: #2dd4bf;
+  --color-xand-teal-dim: #0d9488;
+  --color-xand-purple: #8b5cf6;
+  --color-xand-blue: #3b82f6;
+  --color-xand-green: #22c55e;
+  --color-xand-red: #ef4444;
+  --color-xand-yellow: #eab308;
+  --color-xand-text: #f3f4f6;
+  --color-xand-text-dim: #9ca3af;
+  --color-xand-text-muted: #6b7280;
+}
+
+* {
+  border-color: var(--color-xand-border);
+}
+
+body {
+  background-color: var(--color-xand-darker);
+  color: var(--color-xand-text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-xand-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-xand-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-xand-text-muted);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Pulse dot for status indicator */
+.pulse-dot {
+  position: relative;
+  display: flex;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.pulse-dot::before {
+  content: "";
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: var(--color-xand-teal);
+  opacity: 0.75;
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pulse-dot::after {
+  content: "";
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  height: 0.5rem;
+  width: 0.5rem;
+  background-color: var(--color-xand-teal);
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
