@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -9,17 +9,21 @@ import {
   ExternalLink,
   Copy,
   Check,
-  Server
+  Server,
+  Scale
 } from 'lucide-react';
 import type { PNode, SortField, SortDirection } from '@/types';
 import { formatBytes, formatPercent, truncateKey, formatStake, getGradientColor } from '@/lib/utils';
+import { PerformanceChart, generateHistoricalData } from './PerformanceChart';
 
 interface LeaderboardProps {
   nodes: PNode[];
   loading?: boolean;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
 }
 
-export function Leaderboard({ nodes, loading }: LeaderboardProps) {
+export function Leaderboard({ nodes, loading, selectedIds = [], onSelectionChange }: LeaderboardProps) {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [search, setSearch] = useState('');
@@ -31,6 +35,16 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const toggleSelection = (id: string) => {
+    if (!onSelectionChange) return;
+    
+    if (selectedIds.includes(id)) {
+      onSelectionChange(selectedIds.filter(i => i !== id));
+    } else if (selectedIds.length < 5) {
+      onSelectionChange([...selectedIds, id]);
     }
   };
 
@@ -84,11 +98,20 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
           <h2 className="text-xl font-bold text-xand-text">pNode Leaderboard</h2>
           <p className="text-sm text-xand-text-dim">
             {filteredNodes.length} nodes ranked by performance
+            {selectedIds.length > 0 && (
+              <span className="ml-2 text-xand-purple">• {selectedIds.length} selected for comparison</span>
+            )}
           </p>
         </div>
 
         {/* Search & Filter */}
         <div className="flex items-center gap-2">
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-xand-purple/10 border border-xand-purple/30 rounded-lg">
+              <Scale className="h-4 w-4 text-xand-purple" />
+              <span className="text-sm text-xand-purple font-medium">{selectedIds.length}/5</span>
+            </div>
+          )}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xand-text-muted" />
             <input
@@ -112,6 +135,11 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-xand-border bg-xand-dark/50">
+                {onSelectionChange && (
+                  <th className="text-left text-xs font-semibold text-xand-text-dim uppercase tracking-wider px-4 py-3 w-10">
+                    <span className="sr-only">Select</span>
+                  </th>
+                )}
                 <SortableHeader 
                   field="rank" 
                   currentField={sortField}
@@ -161,6 +189,7 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
                 // Loading skeleton
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-xand-border">
+                    {onSelectionChange && <td className="px-4 py-4"><div className="h-4 w-4 bg-xand-border/50 rounded animate-pulse" /></td>}
                     {Array.from({ length: 7 }).map((_, j) => (
                       <td key={j} className="px-4 py-4 text-sm">
                         <div className="h-4 bg-xand-border/50 rounded animate-pulse" />
@@ -170,7 +199,7 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
                 ))
               ) : sortedNodes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-4 text-sm text-center text-xand-text-dim py-12">
+                  <td colSpan={onSelectionChange ? 8 : 7} className="px-4 py-4 text-sm text-center text-xand-text-dim py-12">
                     <Server className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No pNodes found</p>
                     <p className="text-xs mt-1">Waiting for pnRPC data...</p>
@@ -183,6 +212,9 @@ export function Leaderboard({ nodes, loading }: LeaderboardProps) {
                     node={node}
                     expanded={expandedRow === node.id}
                     onToggle={() => setExpandedRow(expandedRow === node.id ? null : node.id)}
+                    selected={selectedIds.includes(node.id)}
+                    onSelect={onSelectionChange ? () => toggleSelection(node.id) : undefined}
+                    selectionDisabled={!selectedIds.includes(node.id) && selectedIds.length >= 5}
                   />
                 ))
               )}
@@ -228,10 +260,19 @@ interface NodeRowProps {
   node: PNode;
   expanded: boolean;
   onToggle: () => void;
+  selected?: boolean;
+  onSelect?: () => void;
+  selectionDisabled?: boolean;
 }
 
-function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
+function NodeRow({ node, expanded, onToggle, selected, onSelect, selectionDisabled }: NodeRowProps) {
   const [copied, setCopied] = useState(false);
+  
+  // Generate historical data for this node (memoized in real app)
+  const historicalData = useMemo(() => 
+    generateHistoricalData(node.uptime, node.performanceScore, 30),
+    [node.uptime, node.performanceScore]
+  );
 
   const copyKey = () => {
     navigator.clipboard.writeText(node.publicKey);
@@ -242,9 +283,27 @@ function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
   return (
     <>
       <tr 
-        className={`border-b border-xand-border hover:bg-xand-card-hover cursor-pointer transition-colors ${expanded ? 'bg-xand-card-hover' : ''}`}
+        className={`border-b border-xand-border hover:bg-xand-card-hover cursor-pointer transition-colors ${expanded ? 'bg-xand-card-hover' : ''} ${selected ? 'bg-xand-purple/5' : ''}`}
         onClick={onToggle}
       >
+        {/* Checkbox */}
+        {onSelect && (
+          <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={onSelect}
+              disabled={selectionDisabled}
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                selected 
+                  ? 'bg-xand-purple border-xand-purple' 
+                  : selectionDisabled
+                    ? 'border-xand-border opacity-30 cursor-not-allowed'
+                    : 'border-xand-border hover:border-xand-purple'
+              }`}
+            >
+              {selected && <Check className="h-3 w-3 text-white" />}
+            </button>
+          </td>
+        )}
         {/* Rank */}
         <td className="px-4 py-4 text-sm">
           <div className="flex items-center gap-2">
@@ -312,8 +371,8 @@ function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
       {/* Expanded row detail */}
       {expanded && (
         <tr className="bg-xand-dark/30">
-          <td colSpan={7} className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <td colSpan={onSelect ? 8 : 7} className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Status */}
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-xand-text-dim uppercase tracking-wider">Status</h4>
@@ -338,6 +397,7 @@ function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
                   <DetailRow label="Total Stake" value={`${formatStake(node.totalStake)} XAND`} />
                   <DetailRow label="Delegators" value={node.delegatorCount.toString()} />
                   <DetailRow label="Fee" value={formatPercent(node.fee)} />
+                  <DetailRow label="Storage Eff." value={formatPercent(node.storage.efficiency)} />
                 </div>
               </div>
 
@@ -362,6 +422,9 @@ function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
                   {node.location && (
                     <DetailRow label="Location" value={`${node.location.city || '—'}, ${node.location.country || '—'}`} />
                   )}
+                  {node.operator?.name && (
+                    <DetailRow label="Operator" value={node.operator.name} />
+                  )}
                   {node.operator?.website && (
                     <DetailRow label="Website" value={
                       <a 
@@ -375,6 +438,24 @@ function NodeRow({ node, expanded, onToggle }: NodeRowProps) {
                       </a>
                     } />
                   )}
+                </div>
+              </div>
+
+              {/* Historical Performance Graph */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-xand-text-dim uppercase tracking-wider">30-Day Performance</h4>
+                <div className="bg-xand-dark/30 rounded-lg p-3">
+                  <PerformanceChart data={historicalData} height={120} />
+                  <div className="flex items-center justify-center gap-4 mt-2 text-xs">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-xand-teal" />
+                      <span className="text-xand-text-dim">Uptime</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-xand-purple" />
+                      <span className="text-xand-text-dim">Performance</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
