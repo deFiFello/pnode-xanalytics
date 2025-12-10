@@ -5,6 +5,7 @@ import { NetworkOverview } from '@/components/NetworkOverview';
 import { Leaderboard } from '@/components/Leaderboard';
 import { ComparisonTool } from '@/components/ComparisonTool';
 import { NetworkMap } from '@/components/NetworkMap';
+import { QuickGuide } from '@/components/QuickGuide';
 import { getNetworkStats } from '@/lib/xandeum';
 import { getXandPrice } from '@/lib/coingecko';
 import type { NetworkStats, TokenPrice, PNode } from '@/types';
@@ -506,6 +507,11 @@ export default function Dashboard() {
           loading={loading}
           onRefresh={fetchData}
         />
+      </section>
+
+      {/* Quick Guide - collapsible help */}
+      <section className="animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <QuickGuide />
       </section>
 
       {/* pNode Leaderboard */}
