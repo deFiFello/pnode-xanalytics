@@ -131,6 +131,10 @@ export function Leaderboard({ nodes, loading, selectedIds = [], onSelectionChang
 
       {/* Table */}
       <div className="bg-xand-card border border-xand-border rounded-xl p-0 overflow-hidden">
+        {/* Mobile scroll hint */}
+        <div className="lg:hidden px-4 py-2 bg-xand-dark/30 border-b border-xand-border text-xs text-xand-text-muted flex items-center gap-2">
+          <span>←</span> Scroll to see all columns <span>→</span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -371,11 +375,11 @@ function NodeRow({ node, expanded, onToggle, selected, onSelect, selectionDisabl
       {/* Expanded row detail */}
       {expanded && (
         <tr className="bg-xand-dark/30">
-          <td colSpan={onSelect ? 8 : 7} className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <td colSpan={onSelect ? 8 : 7} className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {/* Status */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-xand-text-dim uppercase tracking-wider">Status</h4>
+              <div className="space-y-3">
+                <h4 className="text-xs sm:text-sm font-semibold text-xand-text-dim uppercase tracking-wider">Status</h4>
                 <div className="space-y-2">
                   <DetailRow label="Online" value={
                     <span className={node.online 
