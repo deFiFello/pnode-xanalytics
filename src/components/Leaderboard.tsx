@@ -226,6 +226,14 @@ export function Leaderboard({ nodes, loading, selectedIds = [], onSelectionChang
           </table>
         </div>
       </div>
+
+      {/* Mobile Expanded Detail - renders outside table */}
+      {expandedRow && (
+        <MobileExpandedDetail 
+          node={sortedNodes.find(n => n.id === expandedRow)!}
+          onClose={() => setExpandedRow(null)}
+        />
+      )}
     </div>
   );
 }
@@ -372,9 +380,9 @@ function NodeRow({ node, expanded, onToggle, selected, onSelect, selectionDisabl
         </td>
       </tr>
 
-      {/* Expanded row detail */}
+      {/* Expanded row detail - DESKTOP ONLY */}
       {expanded && (
-        <tr className="bg-xand-dark/30">
+        <tr className="bg-xand-dark/30 hidden lg:table-row">
           <td colSpan={onSelect ? 8 : 7} className="p-0 relative">
             {/* Mobile: fixed width card that doesn't stretch with table */}
             <div className="w-screen lg:w-auto -ml-4 lg:ml-0 p-4 lg:p-6 bg-xand-dark/50 lg:bg-transparent">
@@ -504,6 +512,139 @@ function MobileDetailRow({ label, value }: { label: string; value: React.ReactNo
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5">
       <span className="text-xs text-xand-text-muted">{label}</span>
       <span className="text-xs sm:text-sm text-xand-text">{value}</span>
+    </div>
+  );
+}
+
+// Mobile expanded detail - renders outside the table
+function MobileExpandedDetail({ node, onClose }: { node: PNode; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  
+  const historicalData = useMemo(() => 
+    generateHistoricalData(node.uptime, node.performanceScore, 30),
+    [node.uptime, node.performanceScore]
+  );
+
+  const copyKey = () => {
+    navigator.clipboard.writeText(node.publicKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="lg:hidden bg-xand-card border border-xand-border rounded-xl p-4 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-xand-teal/20 to-xand-blue/20 flex items-center justify-center">
+            <Server className="h-5 w-5 text-xand-teal" />
+          </div>
+          <div>
+            <p className="font-semibold text-xand-text">{node.name}</p>
+            <p className="text-xs text-xand-text-muted">Rank #{node.rank} • Score {node.performanceScore.toFixed(1)}</p>
+          </div>
+        </div>
+        <button 
+          onClick={onClose}
+          className="p-2 text-xand-text-muted hover:text-xand-text"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* 2x2 Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Status */}
+        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Status</h4>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Online</span>
+              <span className={node.online ? 'text-xand-green' : 'text-xand-red'}>
+                {node.online ? '● Yes' : '○ No'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Version</span>
+              <span className="text-xand-text">{node.softwareVersion}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Challenges</span>
+              <span className="text-xand-text">{node.challengesPassed}/{node.challengesTotal}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Success</span>
+              <span className="text-xand-text">{formatPercent(node.challengeSuccessRate)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Staking */}
+        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Staking</h4>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Stake</span>
+              <span className="text-xand-text">{formatStake(node.totalStake)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Delegators</span>
+              <span className="text-xand-text">{node.delegatorCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Fee</span>
+              <span className="text-xand-text">{formatPercent(node.fee)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Efficiency</span>
+              <span className="text-xand-text">{formatPercent(node.storage.efficiency)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Identity */}
+        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Identity</h4>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between items-center">
+              <span className="text-xand-text-muted">Key</span>
+              <button 
+                onClick={copyKey}
+                className="font-mono text-xand-teal flex items-center gap-1"
+              >
+                {truncateKey(node.publicKey, 4)}
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              </button>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xand-text-muted">Location</span>
+              <span className="text-xand-text">{node.location?.country || '—'}</span>
+            </div>
+            {node.operator?.name && (
+              <div className="flex justify-between">
+                <span className="text-xand-text-muted">Operator</span>
+                <span className="text-xand-text truncate max-w-[80px]">{node.operator.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">30-Day</h4>
+          <div className="h-[70px]">
+            <PerformanceChart data={historicalData} height={70} />
+          </div>
+          <div className="flex justify-center gap-3 text-xs">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-xand-teal" /> Up
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-xand-purple" /> Perf
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
