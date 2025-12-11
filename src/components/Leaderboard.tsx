@@ -129,12 +129,37 @@ export function Leaderboard({ nodes, loading, selectedIds = [], onSelectionChang
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-xand-card border border-xand-border rounded-xl p-0 overflow-hidden">
-        {/* Mobile scroll hint */}
-        <div className="lg:hidden px-4 py-2 bg-xand-dark/30 border-b border-xand-border text-xs text-xand-text-muted flex items-center gap-2">
-          <span>←</span> Scroll to see all columns <span>→</span>
-        </div>
+      {/* MOBILE: Card Layout */}
+      <div className="lg:hidden space-y-3">
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-xand-card border border-xand-border rounded-xl p-4 animate-pulse">
+              <div className="h-4 bg-xand-border/50 rounded w-1/2 mb-2" />
+              <div className="h-3 bg-xand-border/50 rounded w-1/3" />
+            </div>
+          ))
+        ) : sortedNodes.length === 0 ? (
+          <div className="bg-xand-card border border-xand-border rounded-xl p-8 text-center">
+            <Server className="h-8 w-8 mx-auto mb-2 opacity-50 text-xand-text-dim" />
+            <p className="text-xand-text-dim">No pNodes found</p>
+          </div>
+        ) : (
+          sortedNodes.map((node) => (
+            <MobileNodeCard
+              key={node.id}
+              node={node}
+              expanded={expandedRow === node.id}
+              onToggle={() => setExpandedRow(expandedRow === node.id ? null : node.id)}
+              selected={selectedIds.includes(node.id)}
+              onSelect={onSelectionChange ? () => toggleSelection(node.id) : undefined}
+              selectionDisabled={!selectedIds.includes(node.id) && selectedIds.length >= 5}
+            />
+          ))
+        )}
+      </div>
+
+      {/* DESKTOP: Table Layout */}
+      <div className="hidden lg:block bg-xand-card border border-xand-border rounded-xl p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -144,96 +169,31 @@ export function Leaderboard({ nodes, loading, selectedIds = [], onSelectionChang
                     <span className="sr-only">Select</span>
                   </th>
                 )}
-                <SortableHeader 
-                  field="rank" 
-                  currentField={sortField}
-                  direction={sortDirection}
-                  onSort={handleSort}
-                >
-                  Rank
-                </SortableHeader>
-                <SortableHeader 
-                  field="performanceScore" 
-                  currentField={sortField}
-                  direction={sortDirection}
-                  onSort={handleSort}
-                >
-                  Score
-                </SortableHeader>
+                <SortableHeader field="rank" currentField={sortField} direction={sortDirection} onSort={handleSort}>Rank</SortableHeader>
+                <SortableHeader field="performanceScore" currentField={sortField} direction={sortDirection} onSort={handleSort}>Score</SortableHeader>
                 <th className="text-left text-xs font-semibold text-xand-text-dim uppercase tracking-wider px-4 py-3">pNode</th>
-                <SortableHeader 
-                  field="storage" 
-                  currentField={sortField}
-                  direction={sortDirection}
-                  onSort={handleSort}
-                >
-                  Storage
-                </SortableHeader>
-                <SortableHeader 
-                  field="uptime" 
-                  currentField={sortField}
-                  direction={sortDirection}
-                  onSort={handleSort}
-                >
-                  Uptime
-                </SortableHeader>
-                <SortableHeader 
-                  field="fee" 
-                  currentField={sortField}
-                  direction={sortDirection}
-                  onSort={handleSort}
-                >
-                  Fee
-                </SortableHeader>
+                <SortableHeader field="storage" currentField={sortField} direction={sortDirection} onSort={handleSort}>Storage</SortableHeader>
+                <SortableHeader field="uptime" currentField={sortField} direction={sortDirection} onSort={handleSort}>Uptime</SortableHeader>
+                <SortableHeader field="fee" currentField={sortField} direction={sortDirection} onSort={handleSort}>Fee</SortableHeader>
                 <th className="text-left text-xs font-semibold text-xand-text-dim uppercase tracking-wider px-4 py-3 w-10"></th>
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                // Loading skeleton
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-xand-border">
-                    {onSelectionChange && <td className="px-4 py-4"><div className="h-4 w-4 bg-xand-border/50 rounded animate-pulse" /></td>}
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <td key={j} className="px-4 py-4 text-sm">
-                        <div className="h-4 bg-xand-border/50 rounded animate-pulse" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : sortedNodes.length === 0 ? (
-                <tr>
-                  <td colSpan={onSelectionChange ? 8 : 7} className="px-4 py-4 text-sm text-center text-xand-text-dim py-12">
-                    <Server className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No pNodes found</p>
-                    <p className="text-xs mt-1">Waiting for pnRPC data...</p>
-                  </td>
-                </tr>
-              ) : (
-                sortedNodes.map((node) => (
-                  <NodeRow 
-                    key={node.id} 
-                    node={node}
-                    expanded={expandedRow === node.id}
-                    onToggle={() => setExpandedRow(expandedRow === node.id ? null : node.id)}
-                    selected={selectedIds.includes(node.id)}
-                    onSelect={onSelectionChange ? () => toggleSelection(node.id) : undefined}
-                    selectionDisabled={!selectedIds.includes(node.id) && selectedIds.length >= 5}
-                  />
-                ))
-              )}
+              {sortedNodes.map((node) => (
+                <NodeRow 
+                  key={node.id} 
+                  node={node}
+                  expanded={expandedRow === node.id}
+                  onToggle={() => setExpandedRow(expandedRow === node.id ? null : node.id)}
+                  selected={selectedIds.includes(node.id)}
+                  onSelect={onSelectionChange ? () => toggleSelection(node.id) : undefined}
+                  selectionDisabled={!selectedIds.includes(node.id) && selectedIds.length >= 5}
+                />
+              ))}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Mobile Expanded Detail - renders outside table */}
-      {expandedRow && (
-        <MobileExpandedDetail 
-          node={sortedNodes.find(n => n.id === expandedRow)!}
-          onClose={() => setExpandedRow(null)}
-        />
-      )}
     </div>
   );
 }
@@ -516,8 +476,17 @@ function MobileDetailRow({ label, value }: { label: string; value: React.ReactNo
   );
 }
 
-// Mobile expanded detail - renders outside the table
-function MobileExpandedDetail({ node, onClose }: { node: PNode; onClose: () => void }) {
+// Mobile Node Card - full card-based layout for mobile
+interface MobileNodeCardProps {
+  node: PNode;
+  expanded: boolean;
+  onToggle: () => void;
+  selected?: boolean;
+  onSelect?: () => void;
+  selectionDisabled?: boolean;
+}
+
+function MobileNodeCard({ node, expanded, onToggle, selected, onSelect, selectionDisabled }: MobileNodeCardProps) {
   const [copied, setCopied] = useState(false);
   
   const historicalData = useMemo(() => 
@@ -532,119 +501,148 @@ function MobileExpandedDetail({ node, onClose }: { node: PNode; onClose: () => v
   };
 
   return (
-    <div className="lg:hidden bg-xand-card border border-xand-border rounded-xl p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-xand-teal/20 to-xand-blue/20 flex items-center justify-center">
-            <Server className="h-5 w-5 text-xand-teal" />
-          </div>
-          <div>
-            <p className="font-semibold text-xand-text">{node.name}</p>
-            <p className="text-xs text-xand-text-muted">Rank #{node.rank} • Score {node.performanceScore.toFixed(1)}</p>
-          </div>
+    <div className={`bg-xand-card border rounded-xl overflow-hidden ${selected ? 'border-xand-purple' : 'border-xand-border'}`}>
+      {/* Card Header - always visible */}
+      <div 
+        className="p-4 flex items-center gap-3 cursor-pointer"
+        onClick={onToggle}
+      >
+        {/* Checkbox */}
+        {onSelect && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSelect(); }}
+            disabled={selectionDisabled}
+            className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+              selected 
+                ? 'bg-xand-purple border-xand-purple' 
+                : selectionDisabled
+                  ? 'border-xand-border opacity-30'
+                  : 'border-xand-border'
+            }`}
+          >
+            {selected && <Check className="h-3 w-3 text-white" />}
+          </button>
+        )}
+
+        {/* Rank */}
+        <span className={`font-bold text-sm w-8 ${
+          node.rank === 1 ? 'text-xand-yellow' :
+          node.rank === 2 ? 'text-xand-text-dim' :
+          node.rank === 3 ? 'text-amber-600' : 'text-xand-text'
+        }`}>
+          #{node.rank}
+        </span>
+
+        {/* Score */}
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-xand-green" />
+          <span className="font-semibold text-xand-text">{node.performanceScore.toFixed(1)}</span>
         </div>
-        <button 
-          onClick={onClose}
-          className="p-2 text-xand-text-muted hover:text-xand-text"
-        >
-          <ChevronUp className="h-5 w-5" />
-        </button>
+
+        {/* Name */}
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-xand-text truncate">{node.name}</p>
+        </div>
+
+        {/* Key metrics */}
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-xand-green">{formatPercent(node.uptime)}</span>
+          <span className="text-xand-text-dim">{formatPercent(node.fee)}</span>
+        </div>
+
+        {/* Expand icon */}
+        <ChevronDown className={`h-4 w-4 text-xand-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </div>
 
-      {/* 2x2 Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Status */}
-        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Status</h4>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Online</span>
-              <span className={node.online ? 'text-xand-green' : 'text-xand-red'}>
-                {node.online ? '● Yes' : '○ No'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Version</span>
-              <span className="text-xand-text">{node.softwareVersion}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Challenges</span>
-              <span className="text-xand-text">{node.challengesPassed}/{node.challengesTotal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Success</span>
-              <span className="text-xand-text">{formatPercent(node.challengeSuccessRate)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Staking */}
-        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Staking</h4>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Stake</span>
-              <span className="text-xand-text">{formatStake(node.totalStake)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Delegators</span>
-              <span className="text-xand-text">{node.delegatorCount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Fee</span>
-              <span className="text-xand-text">{formatPercent(node.fee)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Efficiency</span>
-              <span className="text-xand-text">{formatPercent(node.storage.efficiency)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Identity */}
-        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Identity</h4>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-xand-text-muted">Key</span>
-              <button 
-                onClick={copyKey}
-                className="font-mono text-xand-teal flex items-center gap-1"
-              >
-                {truncateKey(node.publicKey, 4)}
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-              </button>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xand-text-muted">Location</span>
-              <span className="text-xand-text">{node.location?.country || '—'}</span>
-            </div>
-            {node.operator?.name && (
-              <div className="flex justify-between">
-                <span className="text-xand-text-muted">Operator</span>
-                <span className="text-xand-text truncate max-w-[80px]">{node.operator.name}</span>
+      {/* Expanded Content */}
+      {expanded && (
+        <div className="border-t border-xand-border p-4 bg-xand-dark/30">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Status */}
+            <div className="bg-xand-card/50 rounded-lg p-3 space-y-2">
+              <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Status</h4>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Online</span>
+                  <span className={node.online ? 'text-xand-green' : 'text-xand-red'}>
+                    {node.online ? '● Yes' : '○ No'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Version</span>
+                  <span className="text-xand-text">{node.softwareVersion}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Challenges</span>
+                  <span className="text-xand-text">{node.challengesPassed}/{node.challengesTotal}</span>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Chart */}
-        <div className="bg-xand-dark/30 rounded-lg p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-xand-text-dim uppercase">30-Day</h4>
-          <div className="h-[70px]">
-            <PerformanceChart data={historicalData} height={70} />
-          </div>
-          <div className="flex justify-center gap-3 text-xs">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-xand-teal" /> Up
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-xand-purple" /> Perf
-            </span>
+            {/* Staking */}
+            <div className="bg-xand-card/50 rounded-lg p-3 space-y-2">
+              <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Staking</h4>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Stake</span>
+                  <span className="text-xand-text">{formatStake(node.totalStake)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Delegators</span>
+                  <span className="text-xand-text">{node.delegatorCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Fee</span>
+                  <span className="text-xand-text">{formatPercent(node.fee)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Identity */}
+            <div className="bg-xand-card/50 rounded-lg p-3 space-y-2">
+              <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Identity</h4>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-xand-text-muted">Key</span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); copyKey(); }}
+                    className="font-mono text-xand-teal flex items-center gap-1"
+                  >
+                    {truncateKey(node.publicKey, 4)}
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </button>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xand-text-muted">Location</span>
+                  <span className="text-xand-text">{node.location?.country || '—'}</span>
+                </div>
+                {node.operator?.name && (
+                  <div className="flex justify-between">
+                    <span className="text-xand-text-muted">Operator</span>
+                    <span className="text-xand-text truncate max-w-[80px]">{node.operator.name}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Chart */}
+            <div className="bg-xand-card/50 rounded-lg p-3 space-y-2">
+              <h4 className="text-xs font-semibold text-xand-text-dim uppercase">30-Day</h4>
+              <div className="h-[60px]">
+                <PerformanceChart data={historicalData} height={60} />
+              </div>
+              <div className="flex justify-center gap-3 text-xs">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-xand-teal" /> Up
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-xand-purple" /> Perf
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
