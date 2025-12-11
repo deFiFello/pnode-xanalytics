@@ -375,92 +375,109 @@ function NodeRow({ node, expanded, onToggle, selected, onSelect, selectionDisabl
       {/* Expanded row detail */}
       {expanded && (
         <tr className="bg-xand-dark/30">
-          <td colSpan={onSelect ? 8 : 7} className="p-0">
-            {/* Constrain content width on mobile */}
-            <div className="p-4 sm:p-6 min-w-[320px] max-w-[100vw] sm:max-w-none overflow-hidden">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                {/* Status */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-xand-text-dim uppercase tracking-wider">Status</h4>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:space-y-2">
-                    <MobileDetailRow label="Online" value={
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${node.online 
-                        ? 'bg-xand-green/20 text-xand-green' 
-                        : 'bg-xand-red/20 text-xand-red'}`}>
-                        {node.online ? 'Online' : 'Offline'}
-                      </span>
-                    } />
-                    <MobileDetailRow label="Version" value={node.softwareVersion} />
-                    <MobileDetailRow label="Challenges" value={`${node.challengesPassed}/${node.challengesTotal}`} />
-                    <MobileDetailRow label="Success" value={formatPercent(node.challengeSuccessRate)} />
+          <td colSpan={onSelect ? 8 : 7} className="p-0 relative">
+            {/* Mobile: fixed width card that doesn't stretch with table */}
+            <div className="w-screen lg:w-auto -ml-4 lg:ml-0 p-4 lg:p-6 bg-xand-dark/50 lg:bg-transparent">
+              <div className="max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto lg:mx-0">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+                  {/* Status */}
+                  <div className="bg-xand-card/50 lg:bg-transparent rounded-lg p-3 lg:p-0 space-y-2">
+                    <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Status</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Online</span>
+                        <span className={node.online ? 'text-xand-green' : 'text-xand-red'}>
+                          {node.online ? '● Online' : '○ Offline'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Version</span>
+                        <span className="text-xand-text">{node.softwareVersion}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Challenges</span>
+                        <span className="text-xand-text">{node.challengesPassed}/{node.challengesTotal}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Success</span>
+                        <span className="text-xand-text">{formatPercent(node.challengeSuccessRate)}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Staking */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-xand-text-dim uppercase tracking-wider">Staking</h4>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:space-y-2">
-                    <MobileDetailRow label="Stake" value={`${formatStake(node.totalStake)}`} />
-                    <MobileDetailRow label="Delegators" value={node.delegatorCount.toString()} />
-                    <MobileDetailRow label="Fee" value={formatPercent(node.fee)} />
-                    <MobileDetailRow label="Efficiency" value={formatPercent(node.storage.efficiency)} />
+                  {/* Staking */}
+                  <div className="bg-xand-card/50 lg:bg-transparent rounded-lg p-3 lg:p-0 space-y-2">
+                    <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Staking</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Stake</span>
+                        <span className="text-xand-text">{formatStake(node.totalStake)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Delegators</span>
+                        <span className="text-xand-text">{node.delegatorCount}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Fee</span>
+                        <span className="text-xand-text">{formatPercent(node.fee)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Efficiency</span>
+                        <span className="text-xand-text">{formatPercent(node.storage.efficiency)}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Identity */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-xand-text-dim uppercase tracking-wider">Identity</h4>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:space-y-2">
-                    <MobileDetailRow 
-                      label="Key" 
-                      value={
+                  {/* Identity */}
+                  <div className="bg-xand-card/50 lg:bg-transparent rounded-lg p-3 lg:p-0 space-y-2">
+                    <h4 className="text-xs font-semibold text-xand-text-dim uppercase">Identity</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs items-center">
+                        <span className="text-xand-text-muted">Key</span>
                         <button 
                           onClick={(e) => { e.stopPropagation(); copyKey(); }}
-                          className="font-mono text-xs flex items-center gap-1 text-xand-teal"
+                          className="font-mono text-xand-teal flex items-center gap-1"
                         >
                           {truncateKey(node.publicKey, 4)}
-                          {copied ? <Check className="h-3 w-3 text-xand-green" /> : <Copy className="h-3 w-3" />}
+                          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                         </button>
-                      } 
-                    />
-                    {node.location && (
-                      <MobileDetailRow label="Location" value={`${node.location.country || '—'}`} />
-                    )}
-                    {node.operator?.name && (
-                      <MobileDetailRow label="Operator" value={
-                        <span className="truncate max-w-[100px] block">{node.operator.name}</span>
-                      } />
-                    )}
-                    {node.operator?.website && (
-                      <MobileDetailRow label="Website" value={
-                        <a 
-                          href={node.operator.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xand-teal text-xs"
-                        >
-                          Visit ↗
-                        </a>
-                      } />
-                    )}
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-xand-text-muted">Location</span>
+                        <span className="text-xand-text">{node.location?.country || '—'}</span>
+                      </div>
+                      {node.operator?.name && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-xand-text-muted">Operator</span>
+                          <span className="text-xand-text truncate max-w-[80px]">{node.operator.name}</span>
+                        </div>
+                      )}
+                      {node.operator?.website && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-xand-text-muted">Website</span>
+                          <a 
+                            href={node.operator.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xand-teal"
+                          >
+                            Visit ↗
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Historical Performance Graph */}
-                <div className="space-y-2 col-span-1 sm:col-span-2 lg:col-span-1">
-                  <h4 className="text-xs font-semibold text-xand-text-dim uppercase tracking-wider">30-Day Performance</h4>
-                  <div className="bg-xand-dark/30 rounded-lg p-2 sm:p-3">
-                    <PerformanceChart data={historicalData} height={100} />
-                    <div className="flex items-center justify-center gap-4 mt-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-xand-teal" />
-                        <span className="text-xand-text-dim">Uptime</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-xand-purple" />
-                        <span className="text-xand-text-dim">Perf</span>
-                      </div>
+                  {/* Chart */}
+                  <div className="bg-xand-card/50 lg:bg-transparent rounded-lg p-3 lg:p-0 space-y-2">
+                    <h4 className="text-xs font-semibold text-xand-text-dim uppercase">30-Day</h4>
+                    <div className="h-[80px] lg:h-[100px]">
+                      <PerformanceChart data={historicalData} height={80} />
+                    </div>
+                    <div className="flex justify-center gap-3 text-xs">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-xand-teal" /> Up</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-xand-purple" /> Perf</span>
                     </div>
                   </div>
                 </div>
