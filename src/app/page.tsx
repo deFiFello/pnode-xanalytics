@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { QuickGuide, Leaderboard, NetworkOverview } from '@/components';
+import React, { useState, useEffect, useCallback } from 'react';
+import { QuickGuide, Leaderboard, NetworkOverview, ComparisonTool } from '@/components';
+import { PNode } from '@/types';
 
 // Fetch XAND price from CoinGecko
 async function fetchXandPrice() {
@@ -11,62 +12,18 @@ async function fetchXandPrice() {
     );
     const data = await response.json();
     return {
-      usd: data.xandeum?.usd || 0.0045,
+      usd: data.xandeum?.usd || 0.0024,
       usd_24h_change: data.xandeum?.usd_24h_change || 0,
     };
   } catch (error) {
     console.error('Error fetching price:', error);
-    return { usd: 0.0045, usd_24h_change: 0 };
-  }
-}
-
-// Fetch network stats from Xandeum RPC
-async function fetchNetworkStats() {
-  try {
-    // Fetch pNode count from our API route
-    const nodesResponse = await fetch('/api/pnodes');
-    const nodesData = await nodesResponse.json();
-    const activeNodes = nodesData.credits?.filter((n: any) => n.credits > 0).length || 0;
-    const totalNodes = nodesData.credits?.length || 0;
-
-    // Try to fetch epoch info (may fail due to CORS)
-    let currentEpoch = 0;
-    try {
-      const epochResponse = await fetch('https://api.devnet.xandeum.com:8899', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getEpochInfo',
-        }),
-      });
-      const epochData = await epochResponse.json();
-      currentEpoch = epochData.result?.epoch || 0;
-    } catch (e) {
-      console.log('Epoch fetch failed, using default');
-    }
-
-    return {
-      totalNodes: totalNodes || 215,
-      activeNodes: activeNodes || 202,
-      totalStorage: '2.4 PB',
-      usedStorage: '1.8 PB',
-      currentEpoch,
-    };
-  } catch (error) {
-    console.error('Error fetching network stats:', error);
-    return {
-      totalNodes: 215,
-      activeNodes: 202,
-      totalStorage: '2.4 PB',
-      usedStorage: '1.8 PB',
-      currentEpoch: 0,
-    };
+    return { usd: 0.0024, usd_24h_change: 0 };
   }
 }
 
 export default function Home() {
+  const [nodes, setNodes] = useState<PNode[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [stats, setStats] = useState({
     totalNodes: 0,
     activeNodes: 0,
@@ -79,18 +36,30 @@ export default function Home() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [priceData, statsData] = await Promise.all([
-      fetchXandPrice(),
-      fetchNetworkStats(),
-    ]);
+    const priceData = await fetchXandPrice();
     setPrice(priceData);
-    setStats(statsData);
     setLoading(false);
+  };
+
+  const handleNodesLoaded = useCallback((loadedNodes: PNode[]) => {
+    setNodes(loadedNodes);
+    setStats(prev => ({
+      ...prev,
+      totalNodes: loadedNodes.length,
+      activeNodes: loadedNodes.filter(n => n.isOnline).length,
+    }));
+  }, []);
+
+  const handleClearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const handleRemoveFromSelection = (id: string) => {
+    setSelectedIds(prev => prev.filter(i => i !== id));
   };
 
   useEffect(() => {
     fetchData();
-    // Refresh every 60 seconds
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -106,7 +75,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-              <span className="text-xs text-emerald-400">v0.36 • Live on DevNet</span>
+              <span className="text-xs text-emerald-400">v0.37 • Live on DevNet</span>
             </div>
           </div>
         </header>
@@ -126,9 +95,25 @@ export default function Home() {
           <QuickGuide />
         </section>
 
+        {/* Comparison Tool - Shows when nodes selected */}
+        {selectedIds.length > 0 && (
+          <section className="animate-fade-in">
+            <ComparisonTool
+              nodes={nodes}
+              selectedIds={selectedIds}
+              onRemove={handleRemoveFromSelection}
+              onClear={handleClearSelection}
+            />
+          </section>
+        )}
+
         {/* pNode Leaderboard */}
         <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <Leaderboard />
+          <Leaderboard
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onNodesLoaded={handleNodesLoaded}
+          />
         </section>
 
         {/* Footer */}

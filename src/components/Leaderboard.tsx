@@ -18,54 +18,14 @@ import { SmartCalculator } from './SmartCalculator';
 // Fetch real data from our API route (proxies to podcredits)
 async function fetchPNodeData(): Promise<PNode[]> {
   try {
-    // Use local API route to avoid CORS issues
     const response = await fetch('/api/pnodes');
     const data = await response.json();
     
-    if (!data.credits || !Array.isArray(data.credits)) {
+    if (!data.success || !data.nodes || !Array.isArray(data.nodes)) {
       throw new Error('Invalid data format');
     }
-
-    // Transform API data to our PNode format
-    const nodes: PNode[] = data.credits
-      .filter((node: any) => node.credits > 0)
-      .map((node: any, index: number) => {
-        const credits = node.credits || 0;
-        const uptime = 95 + Math.random() * 5; // Simulated until API provides
-        const fee = 2 + Math.random() * 8; // Simulated until API provides
-        const totalStake = 20000 + Math.random() * 40000;
-        const delegators = Math.floor(20 + Math.random() * 40);
-        
-        // Calculate score based on available data
-        const creditScore = Math.min(credits / 600, 100);
-        const uptimeScore = uptime;
-        const feeScore = 100 - (fee * 10);
-        const score = (uptimeScore * 0.4) + (creditScore * 0.4) + (feeScore * 0.2);
-
-        const pubkey = node.identity || `Node${index}`;
-        const shortKey = `${pubkey.slice(0, 6)}...${pubkey.slice(-6)}`;
-
-        return {
-          id: pubkey,
-          name: `pNode-${pubkey.slice(0, 6)}`,
-          shortKey,
-          fullKey: pubkey,
-          score: Math.min(score, 100),
-          uptime: Math.min(uptime, 100),
-          fee: Math.round(fee * 10) / 10,
-          credits,
-          version: '0.8.0',
-          isOnline: true,
-          totalStake: Math.round(totalStake),
-          delegators,
-          location: ['US', 'DE', 'NL', 'FR', 'UK', 'JP', 'SG'][Math.floor(Math.random() * 7)],
-          performanceHistory: Array.from({ length: 8 }, () => 85 + Math.random() * 15),
-          uptimeHistory: Array.from({ length: 8 }, () => 95 + Math.random() * 5),
-        };
-      })
-      .sort((a: PNode, b: PNode) => b.score - a.score);
-
-    return nodes;
+    
+    return data.nodes;
   } catch (error) {
     console.error('Error fetching pNode data:', error);
     return [];
@@ -74,9 +34,12 @@ async function fetchPNodeData(): Promise<PNode[]> {
 
 interface LeaderboardProps {
   initialNodes?: PNode[];
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+  onNodesLoaded?: (nodes: PNode[]) => void;
 }
 
-export function Leaderboard({ initialNodes }: LeaderboardProps) {
+export function Leaderboard({ initialNodes, selectedIds = [], onSelectionChange, onNodesLoaded }: LeaderboardProps) {
   const [nodes, setNodes] = useState<PNode[]>(initialNodes || []);
   const [loading, setLoading] = useState(!initialNodes);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -91,9 +54,19 @@ export function Leaderboard({ initialNodes }: LeaderboardProps) {
       fetchPNodeData().then((data) => {
         setNodes(data);
         setLoading(false);
+        onNodesLoaded?.(data);
       });
     }
-  }, [initialNodes]);
+  }, [initialNodes, onNodesLoaded]);
+
+  const toggleSelection = (id: string) => {
+    if (!onSelectionChange) return;
+    if (selectedIds.includes(id)) {
+      onSelectionChange(selectedIds.filter(i => i !== id));
+    } else if (selectedIds.length < 5) {
+      onSelectionChange([...selectedIds, id]);
+    }
+  };
 
   const filteredNodes = useMemo(() => {
     let result = nodes.filter(node => 
@@ -181,7 +154,12 @@ export function Leaderboard({ initialNodes }: LeaderboardProps) {
           </div>
           <div>
             <h2 className="font-semibold text-zinc-100">pNode Leaderboard</h2>
-            <p className="text-sm text-zinc-500">{filteredNodes.length} nodes • Top 3 highlighted</p>
+            <p className="text-sm text-zinc-500">
+              {filteredNodes.length} nodes • Top 3 highlighted
+              {selectedIds.length > 0 && (
+                <span className="ml-2 text-violet-400">• {selectedIds.length}/5 selected</span>
+              )}
+            </p>
           </div>
         </div>
         <div className="relative">
@@ -198,7 +176,10 @@ export function Leaderboard({ initialNodes }: LeaderboardProps) {
 
       {/* Table Header - Desktop */}
       <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-3 border-b border-zinc-800 bg-zinc-900/50 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-        <div className="col-span-1">Rank</div>
+        <div className="col-span-1 flex items-center gap-2">
+          <div className="w-5" /> {/* Checkbox space */}
+          Rank
+        </div>
         <button 
           onClick={() => handleSort('score')}
           className="col-span-2 flex items-center gap-1 hover:text-zinc-300 transition-colors"
@@ -226,19 +207,37 @@ export function Leaderboard({ initialNodes }: LeaderboardProps) {
 
       {/* Nodes */}
       <div className="divide-y divide-zinc-800/50">
-        {filteredNodes.slice(0, 50).map((node, index) => {
+        {filteredNodes.slice(0, 100).map((node, index) => {
           const badge = getBadge(node, index);
           const isExpanded = expandedId === node.id;
+          const isSelected = selectedIds.includes(node.id);
           
           return (
-            <div key={node.id} className={`${index < 3 ? 'bg-violet-500/[0.02]' : ''}`}>
+            <div key={node.id} className={`${index < 3 ? 'bg-violet-500/[0.02]' : ''} ${isSelected ? 'bg-violet-500/[0.05]' : ''}`}>
               {/* Main Row */}
               <div 
                 className="px-5 py-4 flex items-center lg:grid lg:grid-cols-12 gap-4 cursor-pointer hover:bg-zinc-800/30 transition-colors"
                 onClick={() => setExpandedId(isExpanded ? null : node.id)}
               >
-                {/* Rank */}
-                <div className="lg:col-span-1 flex items-center w-8">
+                {/* Checkbox + Rank */}
+                <div className="lg:col-span-1 flex items-center gap-2 w-12">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSelection(node.id);
+                    }}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      isSelected 
+                        ? 'bg-violet-600 border-violet-600 text-white' 
+                        : 'border-zinc-600 hover:border-violet-500'
+                    }`}
+                  >
+                    {isSelected && (
+                      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
                   {getRankIcon(index)}
                 </div>
 

@@ -157,7 +157,7 @@ export function QuickGuide() {
                     <p className="text-xs text-zinc-400">
                       Composite of uptime, credits, and fee. Higher = better overall performance.
                     </p>
-                    <p className="text-xs text-emerald-400 mt-2">Look for: 90+ score</p>
+                    <p className="text-xs text-emerald-400 mt-2">Look for: 95+ score (top performers)</p>
                   </div>
 
                   {/* Uptime */}
