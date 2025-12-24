@@ -117,43 +117,58 @@ export function QuickGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-zinc-100 mb-3">What is STOINC?</h4>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    <span className="text-emerald-400 font-medium">STOINC (Storage Income)</span> is the reward token 
-                    earned by pNodes for providing storage to the Xandeum network. When you delegate XAND to a pNode, 
-                    you receive a share of the STOINC that pNode earns.
+                    <span className="text-emerald-400 font-medium">STOINC (Storage Income)</span> is revenue earned 
+                    from storage fees paid by sedApps (storage-enabled dApps). Unlike traditional staking rewards, 
+                    STOINC is paid in <span className="text-amber-400 font-medium">SOL</span>, not XAND.
                   </p>
                 </div>
 
                 <div className="p-4 bg-zinc-800/30 rounded-xl border border-zinc-700/30">
-                  <h5 className="font-medium text-zinc-200 mb-3">How STOINC is distributed:</h5>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold flex items-center justify-center">1</span>
-                      <p className="text-sm text-zinc-400">pNode earns STOINC by storing data and passing network challenges</p>
+                  <h5 className="font-medium text-zinc-200 mb-3">How fees are distributed:</h5>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-1.5 border-b border-zinc-700/30">
+                      <span className="text-sm text-zinc-400">pNode operators & delegators</span>
+                      <span className="text-sm font-semibold text-emerald-400">94%</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold flex items-center justify-center">2</span>
-                      <p className="text-sm text-zinc-400">Operator takes their fee (typically 2-8%)</p>
+                    <div className="flex justify-between items-center py-1.5 border-b border-zinc-700/30">
+                      <span className="text-sm text-zinc-400">XAND DAO</span>
+                      <span className="text-sm text-zinc-500">3%</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold flex items-center justify-center">3</span>
-                      <p className="text-sm text-zinc-400">Remaining STOINC is split among all delegators based on stake %</p>
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-sm text-zinc-400">Xandeum Preferred Investors</span>
+                      <span className="text-sm text-zinc-500">3%</span>
                     </div>
                   </div>
                 </div>
 
+                <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl">
+                  <h5 className="font-medium text-violet-300 mb-2">How storageCredits are calculated:</h5>
+                  <p className="text-sm text-zinc-400 mb-2">
+                    Each pNode earns storageCredits every epoch (~2 days) based on:
+                  </p>
+                  <div className="bg-zinc-900/50 rounded-lg p-3 font-mono text-sm text-center">
+                    <span className="text-cyan-400">pNodes</span> × 
+                    <span className="text-emerald-400"> Storage</span> × 
+                    <span className="text-amber-400"> Performance</span> × 
+                    <span className="text-violet-400"> Stake</span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    Your XAND stake directly increases the pNode's storageCredits, which increases its share of STOINC.
+                  </p>
+                </div>
+
                 <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                   <p className="text-sm text-zinc-300">
-                    <span className="font-semibold text-amber-300">Important:</span> STOINC rewards are not fixed. 
-                    They depend on network storage demand—more storage usage means more STOINC earned. This is different 
-                    from traditional staking with fixed APY.
+                    <span className="font-semibold text-amber-300">Important:</span> STOINC depends on actual storage demand 
+                    from sedApps. As the network grows and more apps use Xandeum storage, STOINC earnings increase for everyone.
                   </p>
                 </div>
 
                 <div>
-                  <h5 className="font-medium text-zinc-200 mb-2">Claiming Rewards</h5>
+                  <h5 className="font-medium text-zinc-200 mb-2">Boost Factors</h5>
                   <p className="text-sm text-zinc-400">
-                    STOINC rewards accumulate automatically. You can claim them through the Xandeum staking portal 
-                    at <a href="https://stakexand.xandeum.network" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300">stakexand.xandeum.network</a>.
+                    Certain NFTs and early pNode purchases include boost factors that multiply storageCredits. 
+                    Check <a href="https://docs.xandeum.network" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300">docs.xandeum.network</a> for details.
                   </p>
                 </div>
               </div>
@@ -197,15 +212,16 @@ export function QuickGuide() {
 
                   <div className="p-4 bg-zinc-800/30 rounded-xl border border-violet-500/30">
                     <div className="flex items-start justify-between mb-2">
-                      <h5 className="font-medium text-violet-400">Pool Size (Your Share)</h5>
-                      <span className="text-xs text-violet-400">Often overlooked</span>
+                      <h5 className="font-medium text-violet-400">Pool Size & Your Share</h5>
+                      <span className="text-xs text-violet-400">Key factor</span>
                     </div>
                     <p className="text-sm text-zinc-400 mb-2">
-                      Your rewards = <span className="text-violet-400">(Your Stake ÷ Total Pool)</span> × STOINC earned.
+                      Your stake increases the pNode's <span className="text-violet-400">storageCredits</span>, which increases its STOINC earnings.
+                      But you split those earnings with other delegators.
                     </p>
                     <p className="text-xs text-zinc-500">
                       10,000 XAND in a 50K pool = 20% share. Same 10,000 in a 200K pool = only 5%. 
-                      Smaller pools mean bigger share of rewards.
+                      Smaller pools mean bigger share of that pNode's STOINC.
                     </p>
                   </div>
                 </div>

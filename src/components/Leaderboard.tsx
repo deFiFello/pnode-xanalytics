@@ -45,7 +45,7 @@ export function Leaderboard({
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
-  const [stakeInput, setStakeInput] = useState(userStake);
+  const [stakeInput, setStakeInput] = useState(userStake || 10000);
 
   useEffect(() => {
     fetchPNodeData().then((data) => {
@@ -149,13 +149,17 @@ export function Leaderboard({
           
           {/* Stake Input */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-zinc-500">Your stake:</span>
+            <div className="text-right">
+              <span className="text-sm text-zinc-500">Your stake:</span>
+              <p className="text-[10px] text-zinc-600">Enter amount to see your share</p>
+            </div>
             <div className="relative">
               <input
                 type="number"
                 value={stakeInput}
                 onChange={(e) => setStakeInput(Math.max(0, parseInt(e.target.value) || 0))}
                 className="w-28 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-violet-500/50"
+                placeholder="10000"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">XAND</span>
             </div>
@@ -356,11 +360,11 @@ export function Leaderboard({
                             <div className="pt-3 border-t border-zinc-700/50">
                               <div className="flex justify-between text-sm mb-2">
                                 <span className="text-zinc-400">After {node.fee}% operator fee:</span>
-                                <span className="text-zinc-200">You keep {(parseFloat(yourShare) * (100 - node.fee) / 100).toFixed(2)}%</span>
+                                <span className="text-zinc-200">You receive {(parseFloat(yourShare) * (100 - node.fee) / 100).toFixed(2)}% of STOINC</span>
                               </div>
                               <p className="text-xs text-zinc-500">
                                 <Info className="inline h-3 w-3 mr-1" />
-                                When this pNode earns 100 STOINC, approximately {(parseFloat(yourShare) * (100 - node.fee) / 100).toFixed(1)} goes to you
+                                STOINC is paid in SOL from storage fees. Your stake increases this pNode's storageCredits.
                               </p>
                             </div>
                           </div>
