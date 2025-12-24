@@ -6,13 +6,8 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Pnode Xanalytics | Find the Best pNode for Your XAND',
-  description: 'Analytics platform for Xandeum pNode network. Compare performance, uptime, fees, and make informed delegation decisions.',
+  description: 'Analytics platform for Xandeum pNode network. Compare uptime, fees, pool sizes, and find your optimal share of rewards.',
   keywords: ['Xandeum', 'pNode', 'XAND', 'staking', 'delegation', 'analytics', 'Solana', 'storage'],
-  openGraph: {
-    title: 'Pnode Xanalytics',
-    description: 'Find the best pNode for your XAND delegation',
-    type: 'website',
-  },
 };
 
 export default function RootLayout({

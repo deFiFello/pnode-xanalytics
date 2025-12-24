@@ -1,6 +1,6 @@
 {
   "name": "pnode-xanalytics",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,12 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.87.6",
     "lucide-react": "^0.263.1",
     "next": "14.0.4",
     "react": "^18",
-    "react-dom": "^18",
-    "recharts": "^2.10.3"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",

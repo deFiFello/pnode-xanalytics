@@ -19,10 +19,7 @@ export interface PNode {
 export interface NetworkStats {
   totalNodes: number;
   activeNodes: number;
-  totalStorage: string;
-  usedStorage: string;
   currentEpoch: number;
-  lastUpdated: Date;
 }
 
 export interface XandPrice {

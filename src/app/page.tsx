@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { QuickGuide, Leaderboard, NetworkOverview, ComparisonTool } from '@/components';
+import { Leaderboard, NetworkOverview, ComparisonTool, QuickGuide, Footer } from '@/components';
 import { PNode } from '@/types';
 
-// Fetch XAND price from CoinGecko
 async function fetchXandPrice() {
   try {
     const response = await fetch(
@@ -17,29 +16,42 @@ async function fetchXandPrice() {
     };
   } catch (error) {
     console.error('Error fetching price:', error);
-    return { usd: 0.0024, usd_24h_change: 0 };
+    return { usd: 0.0024, usd_24h_change: -5.27 };
+  }
+}
+
+async function fetchEpoch() {
+  try {
+    const response = await fetch('/api/pnodes');
+    const data = await response.json();
+    return data.epoch || 0;
+  } catch {
+    return 0;
   }
 }
 
 export default function Home() {
   const [nodes, setNodes] = useState<PNode[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [userStake, setUserStake] = useState(10000);
   const [stats, setStats] = useState({
     totalNodes: 0,
     activeNodes: 0,
-    totalStorage: '2.4 PB',
-    usedStorage: '1.8 PB',
     currentEpoch: 0,
   });
-  const [price, setPrice] = useState({ usd: 0, usd_24h_change: 0 });
+  const [price, setPrice] = useState({ usd: 0.0024, usd_24h_change: 0 });
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    const priceData = await fetchXandPrice();
+    const [priceData, epoch] = await Promise.all([
+      fetchXandPrice(),
+      fetchEpoch(),
+    ]);
     setPrice(priceData);
+    setStats(prev => ({ ...prev, currentEpoch: epoch }));
     setLoading(false);
-  };
+  }, []);
 
   const handleNodesLoaded = useCallback((loadedNodes: PNode[]) => {
     setNodes(loadedNodes);
@@ -50,38 +62,30 @@ export default function Home() {
     }));
   }, []);
 
-  const handleClearSelection = () => {
-    setSelectedIds([]);
-  };
-
-  const handleRemoveFromSelection = (id: string) => {
-    setSelectedIds(prev => prev.filter(i => i !== id));
-  };
-
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchData]);
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-zinc-100">Pnode Xanalytics</h1>
-            <p className="text-sm text-zinc-500">Find the best pNode for your XAND delegation</p>
-          </div>
-          <div className="flex items-center gap-3">
+        <header className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+            <div>
+              <h1 className="text-2xl font-bold text-zinc-100">Pnode Xanalytics</h1>
+              <p className="text-zinc-500">Find the best pNode for your XAND delegation</p>
+            </div>
             <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-              <span className="text-xs text-emerald-400">v0.37 • Live on DevNet</span>
+              <span className="text-xs text-emerald-400">Live on DevNet</span>
             </div>
           </div>
         </header>
 
         {/* Network Overview */}
-        <section className="animate-fade-in">
+        <section className="mb-6">
           <NetworkOverview 
             stats={stats} 
             price={price} 
@@ -90,46 +94,36 @@ export default function Home() {
           />
         </section>
 
-        {/* Quick Guide - Educational Content */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        {/* Quick Guide */}
+        <section className="mb-6">
           <QuickGuide />
         </section>
 
-        {/* Comparison Tool - Shows when nodes selected */}
+        {/* Comparison Tool */}
         {selectedIds.length > 0 && (
-          <section className="animate-fade-in">
+          <section className="mb-6">
             <ComparisonTool
               nodes={nodes}
               selectedIds={selectedIds}
-              onRemove={handleRemoveFromSelection}
-              onClear={handleClearSelection}
+              onRemove={(id) => setSelectedIds(prev => prev.filter(i => i !== id))}
+              onClear={() => setSelectedIds([])}
+              userStake={userStake}
             />
           </section>
         )}
 
-        {/* pNode Leaderboard */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        {/* Leaderboard */}
+        <section className="mb-6">
           <Leaderboard
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onNodesLoaded={handleNodesLoaded}
+            userStake={userStake}
           />
         </section>
 
         {/* Footer */}
-        <footer className="pt-8 pb-4 border-t border-zinc-800 text-center">
-          <p className="text-xs text-zinc-600">
-            Pnode Xanalytics • Built for the Xandeum Community • 
-            <a 
-              href="https://github.com/deFiFello/pnode-xanalytics" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-violet-500 hover:text-violet-400 ml-1"
-            >
-              GitHub
-            </a>
-          </p>
-        </footer>
+        <Footer />
       </div>
     </main>
   );
