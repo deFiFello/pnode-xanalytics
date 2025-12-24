@@ -45,8 +45,8 @@ export function ComparisonTool({
         <div className="flex items-center gap-3">
           <Scale className="h-5 w-5 text-violet-400" />
           <div>
-            <h3 className="font-semibold text-zinc-100">Comparing {selectedIds.length} pNodes</h3>
-            <p className="text-xs text-zinc-500">Based on {userStake.toLocaleString()} XAND stake</p>
+            <h3 className="font-semibold text-zinc-100">Compare Pools</h3>
+            <p className="text-xs text-zinc-500">{selectedIds.length} selected • Sorted by your share</p>
           </div>
         </div>
         <button

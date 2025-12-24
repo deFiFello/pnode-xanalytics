@@ -126,9 +126,9 @@ export function Leaderboard({
   const topByCredits = nodes.length > 0 ? nodes[0]?.id : null; // Already sorted by credits
 
   const getBadge = (nodeId: string) => {
-    if (nodeId === topByCredits) return { label: 'Top Performer', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' };
-    if (nodeId === topByUptime) return { label: 'Best Uptime', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
-    if (nodeId === topByFee) return { label: 'Lowest Fee', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' };
+    if (nodeId === topByCredits) return { label: 'Most Active', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
+    if (nodeId === topByUptime) return { label: 'Best Uptime', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' };
+    if (nodeId === topByFee) return { label: 'Lowest Fee', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' };
     return null;
   };
 
@@ -138,27 +138,27 @@ export function Leaderboard({
       <div className="px-6 py-5 border-b border-zinc-800/50">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-100">pNode Leaderboard</h2>
+            <h2 className="text-lg font-semibold text-zinc-100">Explore pNode Pools</h2>
             <p className="text-sm text-zinc-500">
-              Showing {Math.min(visibleCount, nodes.length)} of {nodes.length} nodes
+              {Math.min(visibleCount, nodes.length)} of {nodes.length} pools
               {selectedIds.length > 0 && (
-                <span className="ml-2 text-violet-400">• {selectedIds.length} selected</span>
+                <span className="ml-2 text-violet-400">• {selectedIds.length} selected to compare</span>
               )}
             </p>
           </div>
           
           {/* Stake Input */}
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <span className="text-sm text-zinc-500">Your stake:</span>
-              <p className="text-[10px] text-zinc-600">Enter amount to see your share</p>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <span className="text-sm text-zinc-400">Calculate for:</span>
+              <p className="text-[10px] text-zinc-600">Enter your XAND amount</p>
             </div>
             <div className="relative">
               <input
                 type="number"
                 value={stakeInput}
                 onChange={(e) => setStakeInput(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-28 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-violet-500/50"
+                className="w-32 px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-violet-500/50"
                 placeholder="10000"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">XAND</span>
@@ -167,40 +167,25 @@ export function Leaderboard({
         </div>
       </div>
 
-      {/* Column Headers with Definitions */}
+      {/* Column Headers */}
       <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 border-b border-zinc-800/50 bg-zinc-900/30">
         <div className="col-span-1 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          <span className="flex items-center gap-1">
-            <input type="checkbox" className="opacity-0 w-4" disabled />
-            #
-          </span>
+          #
         </div>
         <div className="col-span-3 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          pNode
+          Pool
         </div>
         <div className="col-span-2 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          <span className="flex items-center gap-1">
-            Uptime
-            <span className="text-zinc-600 font-normal normal-case">• reliability</span>
-          </span>
+          Uptime
         </div>
         <div className="col-span-2 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          <span className="flex items-center gap-1">
-            Fee
-            <span className="text-zinc-600 font-normal normal-case">• operator cut</span>
-          </span>
+          Fee
         </div>
         <div className="col-span-2 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          <span className="flex items-center gap-1">
-            Pool
-            <span className="text-zinc-600 font-normal normal-case">• total staked</span>
-          </span>
+          Pool Size
         </div>
-        <div className="col-span-2 text-xs font-medium text-zinc-500 uppercase tracking-wide">
-          <span className="flex items-center gap-1 text-violet-400">
-            Your Share
-            <span className="text-violet-400/60 font-normal normal-case">• % of rewards</span>
-          </span>
+        <div className="col-span-2 text-xs font-medium text-violet-400 uppercase tracking-wide">
+          Your Share
         </div>
       </div>
 
@@ -486,7 +471,7 @@ export function Leaderboard({
       {/* Bottom hint */}
       <div className="px-6 py-3 bg-zinc-900/30 border-t border-zinc-800/50">
         <p className="text-xs text-zinc-600 text-center">
-          💡 Select up to 5 nodes to compare side-by-side
+          Select pools to compare side-by-side (max 5)
         </p>
       </div>
     </div>

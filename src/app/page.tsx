@@ -73,10 +73,10 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-zinc-100">Pnode Xanalytics</h1>
-              <p className="text-zinc-500">Find the best pNode for your XAND delegation</p>
+              <p className="text-zinc-500">Explore STOINC reward pools and find your best opportunity</p>
             </div>
             <div className="flex items-center gap-3">
               <a
@@ -87,8 +87,8 @@ export default function Home() {
               >
                 Buy XAND
               </a>
-              <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                <span className="text-xs text-emerald-400">Live on DevNet</span>
+              <div className="px-3 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                <span className="text-xs text-zinc-400">DevNet</span>
               </div>
             </div>
           </div>
