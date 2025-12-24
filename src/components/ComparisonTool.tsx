@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { X, Scale, Trophy } from 'lucide-react';
+import { X, Scale, Trophy, Globe } from 'lucide-react';
 import { PNode } from '@/types';
 
 interface ComparisonToolProps {
@@ -96,9 +96,16 @@ export function ComparisonTool({
                 </div>
               )}
 
-              {/* Node name */}
-              <p className="font-medium text-zinc-100 text-sm mb-1">{node.name}</p>
-              <p className="text-xs text-zinc-600 font-mono mb-4">{node.shortKey}</p>
+              {/* Node name with Globe */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center flex-shrink-0">
+                  <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-zinc-100 text-sm truncate">{node.name}</p>
+                  <p className="text-xs text-zinc-600 font-mono">{node.shortKey}</p>
+                </div>
+              </div>
 
               {/* Your Share - Hero metric */}
               <div className="bg-zinc-900/50 rounded-lg p-3 mb-3">

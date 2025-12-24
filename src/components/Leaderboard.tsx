@@ -10,6 +10,8 @@ import {
   ExternalLink,
   Copy,
   TrendingUp,
+  Globe,
+  Award,
 } from 'lucide-react';
 import { PNode } from '@/types';
 
@@ -118,6 +120,18 @@ export function Leaderboard({
 
   const visibleNodes = nodes.slice(0, visibleCount);
 
+  // Identify top performers for badges
+  const topByUptime = nodes.length > 0 ? nodes.reduce((a, b) => a.uptime > b.uptime ? a : b).id : null;
+  const topByFee = nodes.length > 0 ? nodes.reduce((a, b) => a.fee < b.fee ? a : b).id : null;
+  const topByCredits = nodes.length > 0 ? nodes[0]?.id : null; // Already sorted by credits
+
+  const getBadge = (nodeId: string) => {
+    if (nodeId === topByCredits) return { label: 'Top Performer', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' };
+    if (nodeId === topByUptime) return { label: 'Best Uptime', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
+    if (nodeId === topByFee) return { label: 'Lowest Fee', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' };
+    return null;
+  };
+
   return (
     <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden">
       {/* Header */}
@@ -195,6 +209,7 @@ export function Leaderboard({
           const feeContext = getFeeContext(node.fee);
           const poolContext = getPoolContext(node.totalStake);
           const yourShare = calculateYourShare(node.totalStake);
+          const badge = getBadge(node.id);
 
           return (
             <div key={node.id} className={isSelected ? 'bg-violet-500/[0.03]' : ''}>
@@ -221,13 +236,20 @@ export function Leaderboard({
                   <span className="text-sm text-zinc-500 font-mono w-6">{index + 1}</span>
                 </div>
 
-                {/* pNode Name */}
+                {/* pNode Name + Badge */}
                 <div className="col-span-3 flex items-center gap-3 flex-1 lg:flex-none">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center">
-                    <span className="text-xs font-bold text-cyan-400">P</span>
+                    <Globe className="h-4 w-4 text-cyan-400" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-zinc-100 truncate">{node.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-zinc-100 truncate">{node.name}</p>
+                      {badge && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${badge.color}`}>
+                          {badge.label}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-zinc-600 font-mono">{node.shortKey}</p>
                   </div>
                 </div>
@@ -380,11 +402,11 @@ export function Leaderboard({
                           <div className="flex items-center justify-between py-2 border-b border-zinc-700/30">
                             <div>
                               <p className="text-sm text-zinc-400">Credits</p>
-                              <p className="text-xs text-zinc-600">Network activity</p>
+                              <p className="text-xs text-zinc-600">Storage challenges passed</p>
                             </div>
                             <div className="text-right">
                               <p className="font-mono text-zinc-200">{node.credits.toLocaleString()}</p>
-                              <p className="text-xs text-zinc-500">this epoch</p>
+                              <p className="text-xs text-zinc-500">higher = more active</p>
                             </div>
                           </div>
 

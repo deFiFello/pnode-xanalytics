@@ -78,8 +78,18 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-zinc-100">Pnode Xanalytics</h1>
               <p className="text-zinc-500">Find the best pNode for your XAND delegation</p>
             </div>
-            <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-              <span className="text-xs text-emerald-400">Live on DevNet</span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://raydium.io/swap/?inputMint=sol&outputMint=XANDuUoVoUqniKkpcKhrxmvYJybpJvUxJLr21Gaj3Hx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Buy XAND
+              </a>
+              <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <span className="text-xs text-emerald-400">Live on DevNet</span>
+              </div>
             </div>
           </div>
         </header>
