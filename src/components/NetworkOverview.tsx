@@ -44,15 +44,15 @@ export function NetworkOverview({ stats, price, loading, onRefresh }: NetworkOve
         <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <Database className="h-4 w-4 text-zinc-500" />
-            <p className="text-xs text-zinc-500 uppercase tracking-wide">Storage</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Network Capacity</p>
           </div>
           {loading ? (
             <div className="h-7 bg-zinc-800 rounded w-20 animate-pulse" />
           ) : (
             <p className="text-2xl font-bold text-zinc-100">2.4 PB</p>
           )}
-          <p className="text-xs text-emerald-500 flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> 67% utilized
+          <p className="text-xs text-zinc-500">
+            Across {stats.activeNodes} active pNodes
           </p>
         </div>
 
@@ -74,18 +74,18 @@ export function NetworkOverview({ stats, price, loading, onRefresh }: NetworkOve
           </p>
         </div>
 
-        {/* Total STOINC Distributed */}
-        <div className="bg-zinc-900/50 border border-emerald-500/20 rounded-xl p-4">
+        {/* Total Network Credits */}
+        <div className="bg-zinc-900/50 border border-cyan-500/20 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Activity className="h-4 w-4 text-emerald-500" />
-            <p className="text-xs text-emerald-500 uppercase tracking-wide">Total Rewards</p>
+            <Activity className="h-4 w-4 text-cyan-500" />
+            <p className="text-xs text-cyan-500 uppercase tracking-wide">Network Activity</p>
           </div>
           {loading ? (
             <div className="h-7 bg-zinc-800 rounded w-20 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-emerald-400">12.4K SOL</p>
+            <p className="text-2xl font-bold text-cyan-400">12.8M</p>
           )}
-          <p className="text-xs text-zinc-500">Distributed to stakers</p>
+          <p className="text-xs text-zinc-500">Total credits earned</p>
         </div>
 
         {/* Network Age */}

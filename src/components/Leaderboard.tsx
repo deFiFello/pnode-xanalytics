@@ -164,7 +164,7 @@ export function Leaderboard({
               <Trophy className="h-5 w-5 text-amber-400" />
               <h3 className="text-base font-semibold text-zinc-100">Top Performers</h3>
             </div>
-            <p className="text-sm text-zinc-500 mt-1">Proven pools with the most rewards distributed</p>
+            <p className="text-sm text-zinc-500 mt-1">Highest activity credits from API data</p>
           </div>
           <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
             {nodes.slice(0, 3).map((node, i) => (
@@ -212,8 +212,8 @@ export function Leaderboard({
                 
                 <div className="space-y-2">
                   <div>
-                    <p className="text-2xl font-bold text-emerald-400">{node.rewardsDistributed.toFixed(2)} SOL</p>
-                    <p className="text-xs text-zinc-500">Total rewards distributed</p>
+                    <p className="text-2xl font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
+                    <p className="text-xs text-zinc-500">Activity credits (real data)</p>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-zinc-700/30 text-xs">
                     <span className="text-zinc-500">Uptime</span>
@@ -525,39 +525,47 @@ function ExpandedRow({
             </p>
           </div>
 
-          {/* Monthly Payout Chart + Your Estimate */}
+          {/* Projected Earnings + Simulation */}
           <div className="space-y-4 flex flex-col">
-            <h4 className="text-sm font-medium text-zinc-300">Monthly Payouts (Last 6 Months)</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-zinc-300">Projected Earnings</h4>
+              <span className="text-[10px] px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full">SIMULATION</span>
+            </div>
             <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30">
               <MonthlyPayoutChart rewardsDistributed={node.rewardsDistributed} />
             </div>
             
             {/* Your Estimated STOINC */}
             <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4">
-              <h5 className="text-sm font-medium text-violet-300 mb-3">Your Estimated STOINC</h5>
+              <div className="flex items-center justify-between mb-3">
+                <h5 className="text-sm font-medium text-violet-300">If This Pool Earned ~{node.rewardsDistributed.toFixed(0)} SOL/6mo</h5>
+                <span className="text-[10px] px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded-full">PROJECTION</span>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-zinc-500 mb-1">Monthly (est.)</p>
+                  <p className="text-xs text-zinc-500 mb-1">Your monthly share</p>
                   <p className="text-lg font-mono font-bold text-violet-400">
-                    {((node.rewardsDistributed / 6) * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(3)} SOL
+                    ~{((node.rewardsDistributed / 6) * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(3)} SOL
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 mb-1">Yearly (est.)</p>
+                  <p className="text-xs text-zinc-500 mb-1">Your yearly share</p>
                   <p className="text-lg font-mono font-bold text-emerald-400">
-                    {((node.rewardsDistributed / 6) * 12 * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(2)} SOL
+                    ~{((node.rewardsDistributed / 6) * 12 * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(2)} SOL
                   </p>
                 </div>
               </div>
               <p className="text-[10px] text-zinc-600 mt-2">
-                Based on {localStake.toLocaleString()} XAND stake × {afterFee}% share × avg monthly payout
+                Based on {localStake.toLocaleString()} XAND × {afterFee}% effective share
               </p>
             </div>
             
-            <p className="text-xs text-zinc-500">
-              <Info className="inline h-3 w-3 mr-1" />
-              Estimates based on historical data. Actual rewards vary with network usage.
-            </p>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+              <p className="text-xs text-amber-400">
+                <Info className="inline h-3 w-3 mr-1" />
+                <strong>Note:</strong> Actual payout data isn't available via API. Numbers above are derived from activity credits for illustration. Real rewards depend on network storage usage.
+              </p>
+            </div>
           </div>
 
           {/* Node Stats */}
@@ -565,15 +573,15 @@ function ExpandedRow({
             <h4 className="text-sm font-medium text-zinc-300">Pool Stats</h4>
             
             <div className="space-y-3">
-              {/* Rewards Distributed - THE KEY METRIC */}
-              <div className="flex items-center justify-between py-3 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+              {/* Credits - THE REAL METRIC from API */}
+              <div className="flex items-center justify-between py-3 px-3 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
                 <div>
-                  <p className="text-sm font-medium text-emerald-400">Rewards Distributed</p>
-                  <p className="text-xs text-zinc-500">Total SOL paid to stakers</p>
+                  <p className="text-sm font-medium text-cyan-400">Activity Score</p>
+                  <p className="text-xs text-zinc-500">Credits from API (real data)</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-xl font-bold text-emerald-400">{node.rewardsDistributed.toFixed(2)} SOL</p>
-                  <p className="text-xs text-emerald-500/80">Proven payout history</p>
+                  <p className="font-mono text-xl font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
+                  <p className="text-xs text-cyan-500/80">Higher = more active</p>
                 </div>
               </div>
 
@@ -581,23 +589,23 @@ function ExpandedRow({
               <div className="flex items-center justify-between py-2 border-b border-zinc-700/30">
                 <div>
                   <p className="text-sm text-zinc-400">Uptime</p>
-                  <p className="text-xs text-zinc-600">30-day reliability</p>
+                  <p className="text-xs text-zinc-600">Derived from online status</p>
                 </div>
                 <p className={`font-mono font-semibold ${node.uptime >= 99 ? 'text-emerald-400' : node.uptime >= 98 ? 'text-amber-400' : 'text-red-400'}`}>
                   {node.uptime.toFixed(1)}%
                 </p>
               </div>
 
-              {/* Credits - framed as activity proof */}
+              {/* Fee */}
               <div className="flex items-center justify-between py-2 border-b border-zinc-700/30">
                 <div>
-                  <p className="text-sm text-zinc-400">Credits</p>
-                  <p className="text-xs text-zinc-600">Storage work completed</p>
+                  <p className="text-sm text-zinc-400">Operator Fee</p>
+                  <p className="text-xs text-zinc-600">Deducted from rewards</p>
                 </div>
-                <div className="text-right">
-                  <p className="font-mono text-zinc-200">{node.credits.toLocaleString()}</p>
-                  <p className="text-xs text-emerald-500">Actively earning</p>
-                </div>
+                <p className={`font-mono font-semibold ${node.fee <= 5 ? 'text-emerald-400' : node.fee <= 8 ? 'text-amber-400' : 'text-zinc-300'}`}>
+                  {node.fee.toFixed(1)}%
+                </p>
+              </div>
               </div>
 
               {/* Delegators */}
@@ -646,16 +654,16 @@ function ExpandedRow({
   );
 }
 
-// Monthly Payout Chart Component
+// Simulated Monthly Payout Chart Component
 function MonthlyPayoutChart({ rewardsDistributed }: { rewardsDistributed: number }) {
-  // Generate 6-month payout history based on total rewards
-  // Adds some variance to simulate realistic payouts
+  // SIMULATION: Generate projected payouts based on credits
+  // This is NOT real historical data - just an illustration
   const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const avgMonthly = rewardsDistributed / 6;
   
+  // Use deterministic values (no random) so it's consistent
   const payouts = months.map((month, i) => {
-    // Add variance: -30% to +30% from average, trending upward
-    const variance = 0.7 + (i * 0.1) + (Math.random() * 0.2);
+    const variance = 0.7 + (i * 0.1);
     return {
       month,
       amount: Math.max(0, avgMonthly * variance),
@@ -667,17 +675,17 @@ function MonthlyPayoutChart({ rewardsDistributed }: { rewardsDistributed: number
   return (
     <div className="space-y-3">
       {/* Bar Chart */}
-      <div className="flex items-end justify-between gap-2 h-40">
+      <div className="flex items-end justify-between gap-2 h-36">
         {payouts.map((payout, i) => {
           const height = maxPayout > 0 ? (payout.amount / maxPayout) * 100 : 0;
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full flex flex-col items-center justify-end h-32">
-                <span className="text-xs text-emerald-400 font-mono mb-1">
+              <div className="w-full flex flex-col items-center justify-end h-28">
+                <span className="text-xs text-violet-400 font-mono mb-1">
                   {payout.amount.toFixed(1)}
                 </span>
                 <div 
-                  className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t"
+                  className="w-full bg-gradient-to-t from-violet-600 to-violet-400 rounded-t opacity-70"
                   style={{ height: `${Math.max(height, 5)}%` }}
                 />
               </div>
@@ -689,12 +697,12 @@ function MonthlyPayoutChart({ rewardsDistributed }: { rewardsDistributed: number
       
       {/* Summary */}
       <div className="flex items-center justify-between pt-2 border-t border-zinc-700/30">
-        <span className="text-xs text-zinc-500">6-month total</span>
-        <span className="text-sm font-mono font-bold text-emerald-400">{rewardsDistributed.toFixed(2)} SOL</span>
+        <span className="text-xs text-zinc-500">Projected 6-month</span>
+        <span className="text-sm font-mono font-bold text-violet-400">~{rewardsDistributed.toFixed(2)} SOL</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-500">Monthly avg</span>
-        <span className="text-sm font-mono text-zinc-300">{avgMonthly.toFixed(2)} SOL</span>
+        <span className="text-xs text-zinc-500">Projected monthly</span>
+        <span className="text-sm font-mono text-zinc-300">~{avgMonthly.toFixed(2)} SOL</span>
       </div>
     </div>
   );
