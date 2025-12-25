@@ -52,7 +52,7 @@ export function NetworkOverview({ stats, price, loading, onRefresh }: NetworkOve
             <p className="text-2xl font-bold text-zinc-100">2.4 PB</p>
           )}
           <p className="text-xs text-emerald-500 flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> Decentralized across {stats.activeNodes} nodes
+            <TrendingUp className="h-3 w-3" /> 67% utilized
           </p>
         </div>
 
@@ -110,7 +110,15 @@ export function NetworkOverview({ stats, price, loading, onRefresh }: NetworkOve
           ) : (
             <p className="text-2xl font-bold text-zinc-100">{stats.currentEpoch}</p>
           )}
-          <p className="text-xs text-zinc-600">~420 days live</p>
+          <div className="mt-1">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="text-zinc-600">Progress</span>
+              <span className="text-emerald-400">73%</span>
+            </div>
+            <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full" style={{ width: '73%' }} />
+            </div>
+          </div>
         </div>
       </div>
 

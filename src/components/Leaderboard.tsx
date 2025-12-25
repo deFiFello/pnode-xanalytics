@@ -11,6 +11,7 @@ import {
   Globe,
   Zap,
   Trophy,
+  MessageCircle,
 } from 'lucide-react';
 import { PNode } from '@/types';
 
@@ -509,27 +510,53 @@ function ExpandedRow({
               </div>
             </div>
 
-            {/* Stake Now Button */}
+            {/* Delegate Button - Links to Discord since that's how delegation works on DevNet */}
             <a
-              href={`https://pnodes.xandeum.network/#${node.id.slice(0, 6)}`}
+              href="https://discord.gg/xandeum"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-lg transition-colors"
             >
-              Delegate to this pNode
-              <ExternalLink className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" />
+              Join Discord to Delegate
             </a>
+            <p className="text-[10px] text-zinc-600 text-center">
+              DevNet delegation is coordinated via Discord. Copy the node address above to delegate.
+            </p>
           </div>
 
-          {/* Monthly Payout Chart */}
+          {/* Monthly Payout Chart + Your Estimate */}
           <div className="space-y-4 flex flex-col">
             <h4 className="text-sm font-medium text-zinc-300">Monthly Payouts (Last 6 Months)</h4>
-            <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30 flex-1">
+            <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30">
               <MonthlyPayoutChart rewardsDistributed={node.rewardsDistributed} />
             </div>
+            
+            {/* Your Estimated STOINC */}
+            <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4">
+              <h5 className="text-sm font-medium text-violet-300 mb-3">Your Estimated STOINC</h5>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Monthly (est.)</p>
+                  <p className="text-lg font-mono font-bold text-violet-400">
+                    {((node.rewardsDistributed / 6) * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(3)} SOL
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Yearly (est.)</p>
+                  <p className="text-lg font-mono font-bold text-emerald-400">
+                    {((node.rewardsDistributed / 6) * 12 * (localStake / (node.totalStake + localStake)) * (1 - node.fee / 100)).toFixed(2)} SOL
+                  </p>
+                </div>
+              </div>
+              <p className="text-[10px] text-zinc-600 mt-2">
+                Based on {localStake.toLocaleString()} XAND stake × {afterFee}% share × avg monthly payout
+              </p>
+            </div>
+            
             <p className="text-xs text-zinc-500">
               <Info className="inline h-3 w-3 mr-1" />
-              Estimated based on pool activity. Actual payouts vary with network usage.
+              Estimates based on historical data. Actual rewards vary with network usage.
             </p>
           </div>
 

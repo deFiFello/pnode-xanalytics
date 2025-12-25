@@ -105,11 +105,11 @@ export function StakingInfo() {
         <div className="bg-zinc-900/50 border border-amber-500/20 rounded-xl p-5">
           <h4 className="font-semibold text-zinc-100 mb-3">What Are the Risks?</h4>
           <p className="text-sm text-zinc-400 leading-relaxed mb-3">
-            Your staked XAND is <span className="text-emerald-400">not at risk</span>—there's no slashing. However:
+            Your staked XAND is <span className="text-emerald-400">recoverable</span>—you can withdraw anytime. However:
           </p>
           <ul className="text-sm text-zinc-400 space-y-1">
             <li>• <span className="text-zinc-300">Rewards vary</span>—low network usage = low rewards</li>
-            <li>• <span className="text-zinc-300">Network is new</span>—DevNet is live, Mainnet coming 2025</li>
+            <li>• <span className="text-zinc-300">Early stage</span>—DevNet is live, Mainnet launching soon</li>
             <li>• <span className="text-zinc-300">XAND price can change</span>—market risk applies</li>
           </ul>
           <p className="text-xs text-amber-400/80 mt-3 pt-3 border-t border-amber-500/20">

@@ -151,16 +151,15 @@ export function ComparisonTool({
                 </div>
               </div>
 
-              {/* Stake Button */}
+              {/* Delegate Button */}
               <a
-                href={`https://pnodes.xandeum.network/#${node.id.slice(0, 6)}`}
+                href="https://discord.gg/xandeum"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center gap-1.5 w-full mt-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors"
+                className="flex items-center justify-center gap-1.5 w-full mt-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-lg transition-colors"
               >
-                Delegate
-                <ExternalLink className="h-3 w-3" />
+                Join to Delegate
               </a>
             </div>
           );
