@@ -176,7 +176,17 @@ export function Leaderboard({
                     ? 'border-zinc-400/30' 
                     : 'border-amber-700/30'
                 }`}
-                onClick={() => setExpandedId(expandedId === node.id ? null : node.id)}
+                onClick={() => {
+                  // Expand this node
+                  setExpandedId(node.id);
+                  // Scroll to this specific node row after a brief delay
+                  setTimeout(() => {
+                    const nodeRow = document.getElementById(`node-row-${node.id}`);
+                    if (nodeRow) {
+                      nodeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }, 100);
+                }}
               >
                 {/* Rank badge */}
                 <div className={`absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -286,7 +296,7 @@ export function Leaderboard({
           const poolLabel = getPoolLabel(node.totalStake);
 
           return (
-            <div key={node.id} className={isSelected ? 'bg-violet-500/[0.03]' : ''}>
+            <div key={node.id} id={`node-row-${node.id}`} className={isSelected ? 'bg-violet-500/[0.03]' : ''}>
               {/* Main Row */}
               <div 
                 className="px-6 py-4 flex items-center lg:grid lg:grid-cols-12 gap-4 cursor-pointer hover:bg-zinc-800/20 transition-colors"
@@ -501,20 +511,20 @@ function ExpandedRow({
 
             {/* Stake Now Button */}
             <a
-              href={`https://stakexand.xandeum.network/?pool=${node.fullKey}`}
+              href={`https://pnodes.xandeum.network/#${node.id.slice(0, 6)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
             >
-              Stake with this Pool
+              Delegate to this pNode
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
 
           {/* Monthly Payout Chart */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex flex-col">
             <h4 className="text-sm font-medium text-zinc-300">Monthly Payouts (Last 6 Months)</h4>
-            <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/30">
+            <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30 flex-1">
               <MonthlyPayoutChart rewardsDistributed={node.rewardsDistributed} />
             </div>
             <p className="text-xs text-zinc-500">
@@ -630,13 +640,13 @@ function MonthlyPayoutChart({ rewardsDistributed }: { rewardsDistributed: number
   return (
     <div className="space-y-3">
       {/* Bar Chart */}
-      <div className="flex items-end justify-between gap-2 h-24">
+      <div className="flex items-end justify-between gap-2 h-40">
         {payouts.map((payout, i) => {
           const height = maxPayout > 0 ? (payout.amount / maxPayout) * 100 : 0;
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full flex flex-col items-center justify-end h-20">
-                <span className="text-[10px] text-emerald-400 font-mono mb-1">
+              <div className="w-full flex flex-col items-center justify-end h-32">
+                <span className="text-xs text-emerald-400 font-mono mb-1">
                   {payout.amount.toFixed(1)}
                 </span>
                 <div 
@@ -644,7 +654,7 @@ function MonthlyPayoutChart({ rewardsDistributed }: { rewardsDistributed: number
                   style={{ height: `${Math.max(height, 5)}%` }}
                 />
               </div>
-              <span className="text-[10px] text-zinc-500">{payout.month}</span>
+              <span className="text-xs text-zinc-500">{payout.month}</span>
             </div>
           );
         })}

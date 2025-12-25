@@ -89,7 +89,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-zinc-100">pNode Xanalytics</h1>
-              <p className="text-zinc-500">Explore STOINC reward pools and find your best opportunity</p>
+              <p className="text-zinc-500">Explore and earn on the Xandeum Network Storage Income Marketplace (STOINC)</p>
             </div>
             <div className="flex items-center gap-3">
               <a
