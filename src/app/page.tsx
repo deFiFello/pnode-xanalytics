@@ -36,6 +36,7 @@ export default function Home() {
   const [nodes, setNodes] = useState<PNode[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showStakingInfo, setShowStakingInfo] = useState(false);
+  const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalNodes: 0,
     activeNodes: 0,
@@ -62,6 +63,16 @@ export default function Home() {
       totalNodes: loadedNodes.length,
       activeNodes: loadedNodes.filter(n => n.isOnline).length,
     }));
+  }, []);
+
+  // Handle selecting a node from comparison tool - scroll to leaderboard and expand
+  const handleComparisonSelect = useCallback((nodeId: string) => {
+    setExpandedNodeId(nodeId);
+    // Scroll to leaderboard section
+    const leaderboard = document.getElementById('leaderboard-section');
+    if (leaderboard) {
+      leaderboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, []);
 
   useEffect(() => {
@@ -121,7 +132,7 @@ export default function Home() {
             className="w-full bg-zinc-900/50 border border-zinc-800/50 rounded-xl px-5 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors"
           >
             <div className="text-left">
-              <h3 className="font-medium text-zinc-100">New to Xandeum Staking?</h3>
+              <h3 className="font-medium text-zinc-100">New to pNode Staking?</h3>
               <p className="text-sm text-zinc-500">Learn how it works, the risks, and what to expect</p>
             </div>
             {showStakingInfo ? (
@@ -145,18 +156,21 @@ export default function Home() {
               selectedIds={selectedIds}
               onRemove={(id) => setSelectedIds(prev => prev.filter(i => i !== id))}
               onClear={() => setSelectedIds([])}
+              onSelect={handleComparisonSelect}
               userStake={10000}
             />
           </section>
         )}
 
         {/* Leaderboard */}
-        <section className="mb-6">
+        <section id="leaderboard-section" className="mb-6">
           <Leaderboard
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onNodesLoaded={handleNodesLoaded}
             userStake={10000}
+            expandedNodeId={expandedNodeId}
+            onExpandedChange={setExpandedNodeId}
           />
         </section>
 

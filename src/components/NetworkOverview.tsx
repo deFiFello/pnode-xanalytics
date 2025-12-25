@@ -121,8 +121,7 @@ export function NetworkOverview({ stats, price, loading, onRefresh }: NetworkOve
             <h3 className="text-lg font-semibold text-zinc-100 mb-1">Earn SOL by Staking XAND</h3>
             <p className="text-sm text-zinc-400">
               pNodes earn <span className="text-emerald-400 font-medium">STOINC</span> (Storage Income) 
-              from dApp storage fees—paid in SOL, not inflationary tokens. 
-              <span className="text-zinc-300"> Smaller pools = bigger share of rewards.</span>
+              from dApp storage fees—paid in SOL, not inflationary tokens.
             </p>
           </div>
           <div className="flex items-center gap-4">

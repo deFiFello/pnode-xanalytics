@@ -1,38 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Clock, Shield, TrendingUp, HelpCircle, Coins, Server, Zap, ExternalLink } from 'lucide-react';
+import { HelpCircle, Server, Zap, ExternalLink } from 'lucide-react';
 
 export function StakingInfo() {
   return (
     <div className="space-y-4">
-      {/* Quick Facts - The must-knows */}
-      <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-5">
-        <h3 className="text-base font-semibold text-zinc-100 mb-4">Before You Stake</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-zinc-800/30 rounded-lg">
-            <Clock className="h-5 w-5 text-emerald-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-zinc-200">No Lockup</p>
-            <p className="text-xs text-zinc-500">Withdraw anytime</p>
-          </div>
-          <div className="text-center p-3 bg-zinc-800/30 rounded-lg">
-            <Coins className="h-5 w-5 text-emerald-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-zinc-200">No Minimum</p>
-            <p className="text-xs text-zinc-500">Stake any amount</p>
-          </div>
-          <div className="text-center p-3 bg-zinc-800/30 rounded-lg">
-            <Shield className="h-5 w-5 text-amber-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-zinc-200">Your XAND is Safe</p>
-            <p className="text-xs text-zinc-500">No slashing risk</p>
-          </div>
-          <div className="text-center p-3 bg-zinc-800/30 rounded-lg">
-            <TrendingUp className="h-5 w-5 text-violet-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-zinc-200">Manual Claim</p>
-            <p className="text-xs text-zinc-500">Rewards don't auto-compound</p>
-          </div>
-        </div>
-      </div>
-
       {/* Key Concepts */}
       <div className="grid md:grid-cols-3 gap-4">
         {/* What is a pNode */}
