@@ -1,177 +1,180 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { X, Scale, Trophy, Globe, ExternalLink } from 'lucide-react';
-import { PNode } from '@/types';
+import { useState, useEffect } from 'react';
+import { X, Globe, Trophy, ExternalLink } from 'lucide-react';
+
+interface PNode {
+  id: string;
+  credits: number;
+  rank: number;
+}
 
 interface ComparisonToolProps {
-  nodes: PNode[];
   selectedIds: string[];
   onRemove: (id: string) => void;
   onClear: () => void;
-  onSelect?: (id: string) => void;
-  userStake?: number;
 }
 
-export function ComparisonTool({ 
-  nodes, 
-  selectedIds, 
-  onRemove, 
-  onClear,
-  onSelect,
-  userStake = 10000 
-}: ComparisonToolProps) {
-  const selectedNodes = useMemo(() => 
-    nodes.filter(n => selectedIds.includes(n.id)).sort((a, b) => {
-      // Sort by your share (smaller pool = bigger share = better)
-      const aShare = userStake / (a.totalStake + userStake);
-      const bShare = userStake / (b.totalStake + userStake);
-      return bShare - aShare;
-    }),
-    [nodes, selectedIds, userStake]
-  );
+export function ComparisonTool({ selectedIds, onRemove, onClear }: ComparisonToolProps) {
+  const [nodes, setNodes] = useState<PNode[]>([]);
+  const [allNodes, setAllNodes] = useState<PNode[]>([]);
 
-  if (selectedIds.length === 0) return null;
+  useEffect(() => {
+    async function fetchNodes() {
+      try {
+        const res = await fetch('/api/pnodes');
+        const data = await res.json();
+        
+        if (data.success && data.nodes) {
+          const cleanNodes = data.nodes.map((node: any, index: number) => ({
+            id: node.id,
+            credits: node.credits,
+            rank: index + 1,
+          }));
+          setAllNodes(cleanNodes);
+        }
+      } catch (error) {
+        console.error('Failed to fetch:', error);
+      }
+    }
 
-  // Calculate metrics
-  const getYourShare = (pool: number) => ((userStake / (pool + userStake)) * 100).toFixed(1);
-  
-  const bestUptime = Math.max(...selectedNodes.map(n => n.uptime));
-  const lowestFee = Math.min(...selectedNodes.map(n => n.fee));
-  const smallestPool = Math.min(...selectedNodes.map(n => n.totalStake));
+    fetchNodes();
+  }, []);
+
+  useEffect(() => {
+    const selected = allNodes.filter(n => selectedIds.includes(n.id));
+    setNodes(selected);
+  }, [selectedIds, allNodes]);
+
+  if (selectedIds.length === 0) {
+    return null;
+  }
+
+  const maxCredits = Math.max(...nodes.map(n => n.credits), 1);
+  const bestNode = nodes.reduce((best, node) => 
+    node.credits > best.credits ? node : best
+  , nodes[0]);
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden">
+    <div className="bg-zinc-900/50 border border-violet-500/30 rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-zinc-800/50 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Scale className="h-5 w-5 text-violet-400" />
-          <div>
-            <h3 className="font-semibold text-zinc-100">Compare Pools</h3>
-            <p className="text-xs text-zinc-500">{selectedIds.length} selected • Sorted by your share</p>
-          </div>
+        <div>
+          <h3 className="font-semibold text-zinc-100">Compare pNodes</h3>
+          <p className="text-sm text-zinc-500">{nodes.length} selected • Based on activity credits</p>
         </div>
         <button
           onClick={onClear}
-          className="text-sm text-zinc-400 hover:text-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors"
+          className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
         >
-          Clear
+          Clear all
         </button>
       </div>
 
-      {/* Comparison Cards */}
-      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-        {selectedNodes.map((node, index) => {
-          const yourShare = getYourShare(node.totalStake);
-          const isWinner = index === 0;
-          const hasBestUptime = node.uptime === bestUptime;
-          const hasLowestFee = node.fee === lowestFee;
-          const hasSmallestPool = node.totalStake === smallestPool;
+      {/* Comparison Grid */}
+      <div className="p-4">
+        <div className={`grid gap-3 ${
+          nodes.length === 2 ? 'grid-cols-2' :
+          nodes.length === 3 ? 'grid-cols-3' :
+          nodes.length === 4 ? 'grid-cols-2 lg:grid-cols-4' :
+          'grid-cols-2 lg:grid-cols-5'
+        }`}>
+          {nodes.map((node) => {
+            const isBest = node.id === bestNode?.id && nodes.length > 1;
+            const creditRatio = (node.credits / maxCredits) * 100;
 
-          return (
-            <div 
-              key={node.id}
-              className={`rounded-xl border p-4 relative transition-all ${
-                isWinner 
-                  ? 'bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/30' 
-                  : 'bg-zinc-800/30 border-zinc-700/30 hover:border-zinc-600/50'
-              }`}
-            >
-              {/* Remove button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(node.id);
-                }}
-                className="absolute top-2 right-2 p-1 rounded-full hover:bg-zinc-700/50 text-zinc-500 hover:text-zinc-300 transition-colors z-10"
+            return (
+              <div
+                key={node.id}
+                className={`relative bg-zinc-800/30 border rounded-xl p-4 ${
+                  isBest ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-zinc-700/30'
+                }`}
               >
-                <X className="h-3.5 w-3.5" />
-              </button>
+                {/* Remove Button */}
+                <button
+                  onClick={() => onRemove(node.id)}
+                  className="absolute top-2 right-2 p-1 hover:bg-zinc-700/50 rounded transition-colors"
+                >
+                  <X className="h-4 w-4 text-zinc-500" />
+                </button>
 
-              {/* Clickable area */}
-              <div 
-                className="cursor-pointer"
-                onClick={() => onSelect?.(node.id)}
-              >
-                {/* Winner badge */}
-                {isWinner && (
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <Trophy className="h-4 w-4 text-amber-400" />
-                    <span className="text-xs font-semibold text-amber-400">Best Share</span>
-                  </div>
-                )}
-                {!isWinner && (
-                  <div className="mb-3">
-                    <span className="text-xs text-zinc-500">#{index + 1}</span>
+                {/* Best Badge */}
+                {isBest && (
+                  <div className="absolute -top-2 left-3 flex items-center gap-1 px-2 py-0.5 bg-amber-500 text-black text-xs font-bold rounded">
+                    <Trophy className="h-3 w-3" />
+                    BEST
                   </div>
                 )}
 
-                {/* Node name with Globe */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center flex-shrink-0">
-                    <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                {/* Node Icon */}
+                <div className="flex items-center gap-2 mb-3 mt-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center">
+                    <Globe className="h-4 w-4 text-cyan-400" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-zinc-100 text-sm truncate">{node.name}</p>
-                    <p className="text-xs text-zinc-600 font-mono">{node.shortKey}</p>
+                    <p className="font-mono text-xs text-zinc-400 truncate">
+                      {node.id.slice(0, 8)}...{node.id.slice(-4)}
+                    </p>
                   </div>
                 </div>
 
-                {/* Your Share - Hero metric */}
-                <div className="bg-zinc-900/50 rounded-lg p-3 mb-3">
-                  <p className="text-xs text-zinc-500 mb-1">Your share of rewards</p>
-                  <p className={`text-2xl font-bold ${isWinner ? 'text-violet-400' : 'text-zinc-200'}`}>
-                    {yourShare}%
-                  </p>
+                {/* Stats */}
+                <div className="space-y-3">
+                  {/* Rank */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-zinc-500">Rank</span>
+                    <span className={`font-mono font-bold ${
+                      node.rank <= 3 ? 'text-amber-400' :
+                      node.rank <= 10 ? 'text-zinc-200' : 'text-zinc-400'
+                    }`}>
+                      #{node.rank}
+                    </span>
+                  </div>
+
+                  {/* Credits */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-zinc-500">Credits</span>
+                      <span className="font-mono font-bold text-cyan-400">
+                        {node.credits.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-cyan-500 rounded-full transition-all"
+                        style={{ width: `${creditRatio}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Other metrics */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">Uptime</span>
-                    <span className={hasBestUptime ? 'text-emerald-400 font-medium' : 'text-zinc-300'}>
-                      {node.uptime.toFixed(1)}%
-                      {hasBestUptime && ' ✓'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">Fee</span>
-                    <span className={hasLowestFee ? 'text-emerald-400 font-medium' : 'text-zinc-300'}>
-                      {node.fee.toFixed(1)}%
-                      {hasLowestFee && ' ✓'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">Pool</span>
-                    <span className={hasSmallestPool ? 'text-emerald-400 font-medium' : 'text-zinc-300'}>
-                      {(node.totalStake / 1000).toFixed(1)}K
-                      {hasSmallestPool && ' ✓'}
-                    </span>
-                  </div>
-                </div>
+                {/* Action */}
+                <a
+                  href={`https://explorer.xandeum.com/address/${node.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex items-center justify-center gap-1 w-full py-2 bg-zinc-700/30 hover:bg-zinc-700/50 rounded-lg text-xs text-zinc-400 transition-colors"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Explorer
+                </a>
               </div>
-
-              {/* Delegate Button */}
-              <a
-                href="https://discord.gg/xandeum"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center gap-1.5 w-full mt-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-lg transition-colors"
-              >
-                Join to Delegate
-              </a>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Legend */}
-      <div className="px-6 py-3 bg-zinc-900/30 border-t border-zinc-800/50">
-        <p className="text-xs text-zinc-500 text-center">
-          ✓ Best in category • Click card to view details • Sorted by your share
-        </p>
-      </div>
+      {/* Summary */}
+      {nodes.length > 1 && (
+        <div className="px-6 py-4 border-t border-zinc-800/50 bg-zinc-800/20">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-zinc-500">Recommendation:</span>
+            <span className="text-zinc-200">
+              <strong className="text-amber-400">{bestNode?.id.slice(0, 8)}...</strong> has the highest activity credits ({bestNode?.credits.toLocaleString()})
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

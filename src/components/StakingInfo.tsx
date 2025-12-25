@@ -1,122 +1,162 @@
 'use client';
 
-import React from 'react';
-import { HelpCircle, Server, Zap, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp, HardDrive, Coins, Zap, ExternalLink } from 'lucide-react';
 
 export function StakingInfo() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="space-y-4">
-      {/* Key Concepts */}
-      <div className="grid md:grid-cols-3 gap-4">
-        {/* What is a pNode */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Server className="h-5 w-5 text-cyan-400" />
-            <h4 className="font-semibold text-zinc-100">What is a pNode?</h4>
+    <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl overflow-hidden">
+      {/* Toggle Header */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg">📚</span>
+          <span className="font-medium text-zinc-200">Learn: pNodes, STOINC & XAND</span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="h-5 w-5 text-zinc-500" />
+        ) : (
+          <ChevronDown className="h-5 w-5 text-zinc-500" />
+        )}
+      </button>
+
+      {/* Expandable Content */}
+      {isOpen && (
+        <div className="px-6 pb-6 space-y-6">
+          {/* Three Cards */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* What is a pNode? */}
+            <div className="bg-zinc-800/30 border border-zinc-700/30 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-violet-500/20 rounded-lg">
+                  <HardDrive className="h-5 w-5 text-violet-400" />
+                </div>
+                <h3 className="font-semibold text-zinc-100">What is a pNode?</h3>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                A <strong className="text-zinc-200">pNode</strong> (storage node) is a server that provides decentralized storage for the Xandeum network. pNodes store encrypted data chunks and earn rewards for their service.
+              </p>
+              <div className="mt-4 pt-3 border-t border-zinc-700/30">
+                <p className="text-xs text-zinc-500">
+                  Think of it like Filecoin or Arweave, but built specifically for Solana smart contracts.
+                </p>
+              </div>
+            </div>
+
+            {/* What is STOINC? */}
+            <div className="bg-zinc-800/30 border border-zinc-700/30 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                  <Coins className="h-5 w-5 text-emerald-400" />
+                </div>
+                <h3 className="font-semibold text-zinc-100">What is STOINC?</h3>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                <strong className="text-zinc-200">STOINC</strong> (Storage Income) is the reward paid to pNode operators and their delegators. It's paid in SOL based on storage work performed.
+              </p>
+              <div className="mt-4 pt-3 border-t border-zinc-700/30">
+                <p className="text-xs text-zinc-500">
+                  Distribution: 94% to operators & delegators, 3% to DAO, 3% to investors.
+                </p>
+              </div>
+            </div>
+
+            {/* What is XAND? */}
+            <div className="bg-zinc-800/30 border border-zinc-700/30 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-cyan-500/20 rounded-lg">
+                  <Zap className="h-5 w-5 text-cyan-400" />
+                </div>
+                <h3 className="font-semibold text-zinc-100">What is XAND?</h3>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                <strong className="text-zinc-200">XAND</strong> is the native token of the Xandeum network. Staking XAND to pNodes increases their reward share and earns you a portion of STOINC.
+              </p>
+              <div className="mt-4 pt-3 border-t border-zinc-700/30">
+                <p className="text-xs text-zinc-500">
+                  More stake = higher storageCredits = bigger share of rewards.
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            Physical storage servers run by operators worldwide. They store data for Solana dApps 
-            and earn <span className="text-zinc-200">STOINC rewards</span> for their service.
-          </p>
-          <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
-            You don't run a pNode—you stake XAND with one and share its rewards.
-          </p>
-          <a 
-            href="https://pnodes.xandeum.network" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Learn more about pNodes
-          </a>
-        </div>
 
-        {/* What is STOINC */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="h-5 w-5 text-emerald-400" />
-            <h4 className="font-semibold text-zinc-100">What is STOINC?</h4>
+          {/* Understanding Credits */}
+          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-5">
+            <h4 className="font-semibold text-cyan-400 mb-2">Understanding Credits</h4>
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              <strong>Credits</strong> measure storage work completed by each pNode. Higher credits = more active node = more rewards earned. This is the primary metric from the network API.
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-lg font-bold text-cyan-400">Activity</p>
+                <p className="text-xs text-zinc-500">How much work done</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-cyan-400">Reliability</p>
+                <p className="text-xs text-zinc-500">Consistent performance</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-cyan-400">Rewards</p>
+                <p className="text-xs text-zinc-500">Higher credits = more SOL</p>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            <span className="text-emerald-400 font-medium">Storage Income</span>—rewards paid in 
-            <span className="text-emerald-400"> SOL</span>. When dApps use Xandeum storage, they pay fees. 
-            <span className="text-zinc-200"> 94% goes to pNodes and their stakers.</span>
-          </p>
-          <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
-            Real revenue from real usage—not inflationary token rewards.
-          </p>
-          <a 
-            href="https://www.xandeum.network/xand-tokenomics" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
-          >
-            <ExternalLink className="h-3 w-3" />
-            STOINC & tokenomics
-          </a>
-        </div>
 
-        {/* Where does yield come from */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <HelpCircle className="h-5 w-5 text-amber-400" />
-            <h4 className="font-semibold text-zinc-100">Where Does Yield Come From?</h4>
+          {/* How to Participate */}
+          <div className="bg-zinc-800/30 border border-zinc-700/30 rounded-xl p-5">
+            <h4 className="font-semibold text-zinc-100 mb-3">How to Participate</h4>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-violet-400 mb-1">As a Delegator (Staker)</p>
+                <p className="text-sm text-zinc-400">
+                  Stake XAND to high-performing pNodes via the Xandeum Foundation Delegation Program. Join Discord to coordinate delegation.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-emerald-400 mb-1">As an Operator</p>
+                <p className="text-sm text-zinc-400">
+                  Run your own pNode server to provide storage and earn STOINC directly. See pnodes.xandeum.network for setup guide.
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            Solana dApps pay <span className="text-zinc-200">storage fees in SOL</span> to use Xandeum's 
-            decentralized storage. These fees are distributed to pNode operators and stakers every epoch (~2 days).
-          </p>
-          <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
-            More dApps using storage = more rewards for everyone.
-          </p>
-          <a 
-            href="https://docs.xandeum.network" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Read the docs
-          </a>
-        </div>
-      </div>
 
-      {/* APY & Risks */}
-      <div className="grid md:grid-cols-2 gap-4">
-        {/* Variable APY */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-5">
-          <h4 className="font-semibold text-zinc-100 mb-3">What's the APY?</h4>
-          <p className="text-sm text-zinc-400 leading-relaxed mb-3">
-            <span className="text-amber-400 font-medium">Variable</span>—there's no fixed APY. 
-            Rewards depend on:
-          </p>
-          <ul className="text-sm text-zinc-400 space-y-1">
-            <li>• Network storage demand (more usage = more fees)</li>
-            <li>• Your share of the pool (smaller pool = bigger share)</li>
-            <li>• The pNode's performance and uptime</li>
-          </ul>
-          <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
-            As Xandeum adoption grows, so does earning potential.
-          </p>
+          {/* Links */}
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="https://www.xandeum.network/xand-tokenomics"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              XAND Tokenomics
+            </a>
+            <a
+              href="https://pnodes.xandeum.network"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              pNode Setup Guide
+            </a>
+            <a
+              href="https://docs.xandeum.network"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Technical Docs
+            </a>
+          </div>
         </div>
-
-        {/* Risks */}
-        <div className="bg-zinc-900/50 border border-amber-500/20 rounded-xl p-5">
-          <h4 className="font-semibold text-zinc-100 mb-3">What Are the Risks?</h4>
-          <p className="text-sm text-zinc-400 leading-relaxed mb-3">
-            Your staked XAND is <span className="text-emerald-400">recoverable</span>—you can withdraw anytime. However:
-          </p>
-          <ul className="text-sm text-zinc-400 space-y-1">
-            <li>• <span className="text-zinc-300">Rewards vary</span>—low network usage = low rewards</li>
-            <li>• <span className="text-zinc-300">Early stage</span>—DevNet is live, Mainnet launching soon</li>
-            <li>• <span className="text-zinc-300">XAND price can change</span>—market risk applies</li>
-          </ul>
-          <p className="text-xs text-amber-400/80 mt-3 pt-3 border-t border-amber-500/20">
-            Only stake what you can afford to leave for a while.
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

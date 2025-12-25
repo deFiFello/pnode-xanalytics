@@ -63,7 +63,7 @@ export function Footer() {
 
         {/* Version */}
         <div className="text-xs text-zinc-600">
-          v0.42 • DevNet
+          v0.48 • DevNet
         </div>
       </div>
     </footer>

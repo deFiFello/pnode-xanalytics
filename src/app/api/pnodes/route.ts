@@ -12,13 +12,13 @@ interface PodCreditsResponse {
 
 export async function GET() {
   try {
-    // Fetch pNode credits
+    // Fetch REAL pNode data from Xandeum pRPC
     const creditsResponse = await fetch('https://podcredits.xandeum.network/api/pods-credits', {
       headers: { 'Accept': 'application/json' },
       next: { revalidate: 60 },
     });
 
-    // Fetch epoch info (server-side avoids CORS)
+    // Fetch epoch from DevNet RPC
     let currentEpoch = 0;
     try {
       const epochResponse = await fetch('https://api.devnet.xandeum.com:8899', {
@@ -44,18 +44,27 @@ export async function GET() {
     const data: PodCreditsResponse = await creditsResponse.json();
     
     if (data.status === 'success' && data.pods_credits?.length > 0) {
-      const maxCredits = Math.max(...data.pods_credits.map(p => p.credits));
-      
-      const nodes = data.pods_credits
+      // Sort by credits (descending) and map to clean structure
+      const sortedNodes = data.pods_credits
         .filter(p => p.credits > 0)
-        .sort((a, b) => b.credits - a.credits)
-        .map((pod, index) => convertToPNode(pod, index, maxCredits));
+        .sort((a, b) => b.credits - a.credits);
+
+      const totalCredits = sortedNodes.reduce((sum, p) => sum + p.credits, 0);
+
+      // Return ONLY real data from API
+      const nodes = sortedNodes.map((pod, index) => ({
+        id: pod.pod_id,           // Real: pNode public key
+        credits: pod.credits,     // Real: activity credits from network
+        rank: index + 1,          // Derived: position by credits
+      }));
 
       return NextResponse.json({
         success: true,
         source: 'podcredits.xandeum.network',
+        dataType: 'pRPC (real network data)',
         count: nodes.length,
         nodes,
+        totalCredits,
         epoch: currentEpoch,
         timestamp: new Date().toISOString(),
       });
@@ -63,84 +72,17 @@ export async function GET() {
 
     throw new Error('Invalid response format');
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching pNode data:', error);
     
     return NextResponse.json({
-      success: true,
-      source: 'fallback',
-      count: 50,
-      nodes: generateFallbackData(),
+      success: false,
+      error: 'Failed to fetch from pRPC endpoint',
+      source: 'error',
+      count: 0,
+      nodes: [],
+      totalCredits: 0,
       epoch: 0,
       timestamp: new Date().toISOString(),
     });
   }
-}
-
-function convertToPNode(pod: PodCredit, index: number, maxCredits: number) {
-  const creditRatio = maxCredits > 0 ? pod.credits / maxCredits : 0;
-  
-  // Score: 85-99 based on credit ranking
-  const score = Math.round((85 + creditRatio * 14) * 10) / 10;
-  
-  // Uptime: 95-99.9 based on activity
-  const uptime = Math.round((95 + creditRatio * 4.9) * 10) / 10;
-  
-  // Generate deterministic values from pod_id
-  const hash = pod.pod_id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  
-  // Fee: 2-8%
-  const fee = Math.round((2 + (hash % 60) / 10) * 10) / 10;
-  
-  // Total stake: 15k-80k
-  const totalStake = 15000 + (hash % 65000);
-  
-  // Delegators: 5-60
-  const delegators = 5 + (hash % 55);
-  
-  // Location
-  const locations = ['US', 'DE', 'FR', 'NL', 'GB', 'JP', 'SG', 'CA', 'AU', 'BR'];
-  const location = locations[hash % locations.length];
-
-  // Rewards distributed: derive from credits (credits represent storage work done)
-  // Higher credits = more work = more SOL earned
-  // Scale: ~0.001 SOL per 1000 credits as a reasonable baseline
-  const rewardsDistributed = Math.round((pod.credits / 1000) * 0.85 * 100) / 100;
-
-  return {
-    id: pod.pod_id,
-    name: `pNode-${pod.pod_id.slice(0, 6)}`,
-    shortKey: `${pod.pod_id.slice(0, 6)}...${pod.pod_id.slice(-4)}`,
-    fullKey: pod.pod_id,
-    score,
-    uptime,
-    fee,
-    credits: pod.credits,
-    rewardsDistributed,
-    version: '0.8.0',
-    isOnline: true,
-    totalStake,
-    delegators,
-    location,
-    performanceHistory: Array.from({ length: 8 }, () => score - 5 + Math.random() * 10),
-    uptimeHistory: Array.from({ length: 8 }, () => 95 + Math.random() * 5),
-  };
-}
-
-function generateFallbackData() {
-  const nodes = [];
-  for (let i = 0; i < 50; i++) {
-    const id = generateRandomId();
-    const credits = Math.floor(55000 - i * 500 + Math.random() * 1000);
-    nodes.push(convertToPNode({ pod_id: id, credits }, i, 55000));
-  }
-  return nodes;
-}
-
-function generateRandomId(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
-  let result = '';
-  for (let i = 0; i < 44; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
 }
