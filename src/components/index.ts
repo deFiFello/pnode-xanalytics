@@ -1,5 +1,5 @@
 export { Leaderboard } from './Leaderboard';
 export { NetworkOverview } from './NetworkOverview';
 export { ComparisonTool } from './ComparisonTool';
-export { QuickGuide } from './QuickGuide';
+export { StakingInfo } from './StakingInfo';
 export { Footer } from './Footer';
