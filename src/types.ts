@@ -7,6 +7,7 @@ export interface PNode {
   uptime: number;
   fee: number;
   credits: number;
+  rewardsDistributed: number; // SOL distributed to this pool
   version: string;
   isOnline: boolean;
   totalStake: number;

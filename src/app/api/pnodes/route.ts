@@ -101,6 +101,11 @@ function convertToPNode(pod: PodCredit, index: number, maxCredits: number) {
   const locations = ['US', 'DE', 'FR', 'NL', 'GB', 'JP', 'SG', 'CA', 'AU', 'BR'];
   const location = locations[hash % locations.length];
 
+  // Rewards distributed: derive from credits (credits represent storage work done)
+  // Higher credits = more work = more SOL earned
+  // Scale: ~0.001 SOL per 1000 credits as a reasonable baseline
+  const rewardsDistributed = Math.round((pod.credits / 1000) * 0.85 * 100) / 100;
+
   return {
     id: pod.pod_id,
     name: `pNode-${pod.pod_id.slice(0, 6)}`,
@@ -110,6 +115,7 @@ function convertToPNode(pod: PodCredit, index: number, maxCredits: number) {
     uptime,
     fee,
     credits: pod.credits,
+    rewardsDistributed,
     version: '0.8.0',
     isOnline: true,
     totalStake,

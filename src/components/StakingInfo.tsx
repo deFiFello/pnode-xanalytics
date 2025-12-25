@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, Shield, TrendingUp, HelpCircle, Coins, Server, Zap } from 'lucide-react';
+import { Clock, Shield, TrendingUp, HelpCircle, Coins, Server, Zap, ExternalLink } from 'lucide-react';
 
 export function StakingInfo() {
   return (
@@ -48,6 +48,15 @@ export function StakingInfo() {
           <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
             You don't run a pNode—you stake XAND with one and share its rewards.
           </p>
+          <a 
+            href="https://pnodes.xandeum.network" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Learn more about pNodes
+          </a>
         </div>
 
         {/* What is STOINC */}
@@ -64,6 +73,15 @@ export function StakingInfo() {
           <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
             Real revenue from real usage—not inflationary token rewards.
           </p>
+          <a 
+            href="https://www.xandeum.network/xand-tokenomics" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            STOINC & tokenomics
+          </a>
         </div>
 
         {/* Where does yield come from */}
@@ -79,6 +97,15 @@ export function StakingInfo() {
           <p className="text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-800/50">
             More dApps using storage = more rewards for everyone.
           </p>
+          <a 
+            href="https://docs.xandeum.network" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Read the docs
+          </a>
         </div>
       </div>
 

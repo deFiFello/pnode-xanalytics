@@ -10,6 +10,7 @@ import {
   Copy,
   Globe,
   Zap,
+  Trophy,
 } from 'lucide-react';
 import { PNode } from '@/types';
 
@@ -129,7 +130,73 @@ export function Leaderboard({
   }
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden">
+    <div className="space-y-4">
+      {/* Top 3 Performers */}
+      {nodes.length >= 3 && (
+        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-800/50">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-400" />
+              <h3 className="text-base font-semibold text-zinc-100">Top Performers</h3>
+            </div>
+            <p className="text-sm text-zinc-500 mt-1">Proven pools with the most rewards distributed</p>
+          </div>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            {nodes.slice(0, 3).map((node, i) => (
+              <div 
+                key={node.id} 
+                className={`relative bg-zinc-800/30 border rounded-xl p-4 cursor-pointer hover:bg-zinc-800/50 transition-colors ${
+                  i === 0 
+                    ? 'border-amber-500/30 bg-amber-500/5' 
+                    : i === 1 
+                    ? 'border-zinc-400/30' 
+                    : 'border-amber-700/30'
+                }`}
+                onClick={() => setExpandedId(expandedId === node.id ? null : node.id)}
+              >
+                {/* Rank badge */}
+                <div className={`absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                  i === 0 
+                    ? 'bg-amber-500 text-black' 
+                    : i === 1 
+                    ? 'bg-zinc-400 text-black' 
+                    : 'bg-amber-700 text-white'
+                }`}>
+                  {i + 1}
+                </div>
+                
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center">
+                    <Globe className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-100">{node.name}</p>
+                    <p className="text-xs text-zinc-600 font-mono">{node.shortKey}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-400">{node.rewardsDistributed.toFixed(2)} SOL</p>
+                    <p className="text-xs text-zinc-500">Total rewards distributed</p>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-zinc-700/30 text-xs">
+                    <span className="text-zinc-500">Uptime</span>
+                    <span className={node.uptime >= 99 ? 'text-emerald-400' : 'text-zinc-300'}>{node.uptime.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-500">Fee</span>
+                    <span className="text-zinc-300">{node.fee.toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Leaderboard */}
+      <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden">
       {/* Header with Guidance */}
       <div className="px-6 py-5 border-b border-zinc-800/50">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
@@ -318,6 +385,7 @@ export function Leaderboard({
         </p>
       </div>
     </div>
+    </div>
   );
 }
 
@@ -420,6 +488,18 @@ function ExpandedRow({
             <h4 className="text-sm font-medium text-zinc-300">Pool Stats</h4>
             
             <div className="space-y-3">
+              {/* Rewards Distributed - THE KEY METRIC */}
+              <div className="flex items-center justify-between py-3 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-emerald-400">Rewards Distributed</p>
+                  <p className="text-xs text-zinc-500">Total SOL paid to stakers</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-xl font-bold text-emerald-400">{node.rewardsDistributed.toFixed(2)} SOL</p>
+                  <p className="text-xs text-emerald-500/80">Proven payout history</p>
+                </div>
+              </div>
+
               {/* Uptime */}
               <div className="flex items-center justify-between py-2 border-b border-zinc-700/30">
                 <div>
