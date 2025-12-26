@@ -59,14 +59,14 @@ export function NetworkOverview() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
             Pnode Xanalytics
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-xs md:text-sm text-zinc-500">
             Earn Solana for strengthening Xandeum's Storage Network
           </p>
         </div>
@@ -92,10 +92,10 @@ export function NetworkOverview() {
         </div>
       </div>
 
-      {/* Stats Grid - Bento style */}
-      <div className="grid grid-cols-5 gap-[1px] bg-purple-500/10">
+      {/* Stats Grid - Responsive */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-[1px] bg-purple-500/10">
         {/* pNodes */}
-        <div className="bg-black p-4">
+        <div className="bg-black p-3 md:p-4">
           <div className="flex items-center gap-2 mb-1">
             <p className="text-[10px] uppercase tracking-wider text-zinc-600">pNodes</p>
             <span className="flex items-center gap-1">
@@ -106,60 +106,60 @@ export function NetworkOverview() {
           {loading ? (
             <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-xl font-mono font-bold text-white">{stats.activeNodes}</p>
+            <p className="text-lg md:text-xl font-mono font-bold text-white">{stats.activeNodes}</p>
           )}
-          <p className="text-[10px] text-purple-400 mt-1">Active on network</p>
+          <p className="text-[10px] text-purple-400 mt-1">Active</p>
         </div>
 
         {/* Credits */}
-        <div className="bg-black p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Network Credits</p>
+        <div className="bg-black p-3 md:p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Credits</p>
           {loading ? (
             <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-xl font-mono font-bold text-cyan-400">{formatNumber(stats.totalCredits)}</p>
+            <p className="text-lg md:text-xl font-mono font-bold text-cyan-400">{formatNumber(stats.totalCredits)}</p>
           )}
-          <p className="text-[10px] text-zinc-500 mt-1">Work completed</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Network total</p>
         </div>
 
         {/* XAND Price */}
-        <div className="bg-black p-4">
+        <div className="bg-black p-3 md:p-4">
           <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">XAND</p>
           {loading ? (
             <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
+            <p className="text-lg md:text-xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
           )}
           <p className={`text-[10px] mt-1 font-mono ${stats.priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}% 24h
+            {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}%
           </p>
         </div>
 
         {/* Market Cap */}
-        <div className="bg-black p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Market Cap</p>
+        <div className="bg-black p-3 md:p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Mkt Cap</p>
           {loading ? (
             <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
+            <p className="text-lg md:text-xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
           )}
           <p className="text-[10px] text-zinc-500 mt-1">Circulating</p>
         </div>
 
-        {/* Epoch */}
-        <div className="bg-black p-4">
+        {/* Epoch - spans 2 cols on mobile to fill row */}
+        <div className="bg-black p-3 md:p-4 col-span-2 md:col-span-1">
           <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Epoch</p>
           {loading ? (
             <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-xl font-mono font-bold text-white">{stats.epoch}</p>
+            <p className="text-lg md:text-xl font-mono font-bold text-white">{stats.epoch}</p>
           )}
           <p className="text-[10px] text-zinc-500 mt-1">~2 days each</p>
         </div>
       </div>
 
-      {/* Data Source */}
-      <div className="flex items-center justify-between text-[10px] text-zinc-600 px-1">
+      {/* Data Source - hidden on mobile, shown on md+ */}
+      <div className="hidden md:flex items-center justify-between text-[10px] text-zinc-600 px-1">
         <span>Data: podcredits.xandeum.network • CoinGecko • DevNet RPC</span>
         <span>Updated in real-time</span>
       </div>

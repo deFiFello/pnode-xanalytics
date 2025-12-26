@@ -4,14 +4,9 @@ import { ExternalLink } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="border-t border-purple-500/10 py-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-xs text-zinc-600">
-          <span>Pnode Xanalytics</span>
-          <span className="mx-2">•</span>
-          <span>Built for Xandeum pNode Analytics Bounty</span>
-        </div>
-        <div className="flex items-center gap-4">
+    <footer className="border-t border-purple-500/10 py-4 md:py-6">
+      <div className="flex flex-col items-center gap-3 md:gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
           <a
             href="https://github.com/deFiFello/pnode-xanalytics"
             target="_blank"
@@ -53,6 +48,9 @@ export function Footer() {
             Explorer <ExternalLink className="h-3 w-3" />
           </a>
         </div>
+        <p className="text-[10px] md:text-xs text-zinc-600 text-center">
+          Pnode Xanalytics • Built for Xandeum pNode Analytics Bounty
+        </p>
       </div>
     </footer>
   );

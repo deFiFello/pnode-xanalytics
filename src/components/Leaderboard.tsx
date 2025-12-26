@@ -91,39 +91,39 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   const renderEducationContent = () => {
     if (activeTab === 'pnodes') {
       return (
-        <div className="p-6 border-b border-purple-500/15">
-          <div className="grid grid-cols-2 gap-6">
+        <div className="p-4 md:p-6 border-b border-purple-500/15">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: Simple explanation */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">What is a pNode?</h3>
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">What is a pNode?</h3>
               <p className="text-sm text-zinc-400 mb-4">
                 A storage server that earns SOL by hosting data for Solana apps.
               </p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+              <div className="space-y-2 md:space-y-3">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">1</span>
-                  <span className="text-sm text-zinc-300">Stores encrypted data for dApps</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Stores encrypted data for dApps</span>
                 </div>
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">2</span>
-                  <span className="text-sm text-zinc-300">Proves it still has the data (earns credits)</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Proves it still has the data (earns credits)</span>
                 </div>
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">3</span>
-                  <span className="text-sm text-zinc-300">Gets paid SOL based on credits earned</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Gets paid SOL based on credits earned</span>
                 </div>
               </div>
             </div>
 
             {/* Right: Why stake */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">Why Delegate XAND?</h3>
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">Why Delegate XAND?</h3>
               <p className="text-sm text-zinc-400 mb-4">
                 Your XAND stake boosts the node's earning power. You share in their SOL rewards.
               </p>
-              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5">
+              <div className="p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5">
                 <p className="text-xs text-emerald-400 uppercase mb-2">The Formula</p>
-                <code className="text-sm text-white block mb-2">
+                <code className="text-xs md:text-sm text-white block mb-2">
                   earnings = nodes × storage × performance × <span className="text-emerald-400">stake</span>
                 </code>
                 <p className="text-xs text-zinc-500">Higher stake = higher earnings for everyone in the pool</p>
@@ -132,7 +132,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 href="https://www.xandeum.network/stoinc" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-block mt-4 text-xs text-purple-400 hover:text-purple-300"
+                className="inline-block mt-3 md:mt-4 text-xs text-purple-400 hover:text-purple-300"
               >
                 Learn more at xandeum.network/stoinc →
               </a>
@@ -144,17 +144,17 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
     if (activeTab === 'stoinc') {
       return (
-        <div className="p-6 border-b border-purple-500/15">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="p-4 md:p-6 border-b border-purple-500/15">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Left: Distribution */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">STOINC = Storage Income</h3>
-              <p className="text-sm text-zinc-400 mb-6">
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">STOINC = Storage Income</h3>
+              <p className="text-sm text-zinc-400 mb-4 md:mb-6">
                 SOL fees from storage-enabled dApps, distributed every ~2 days.
               </p>
               
-              <div className="flex items-center gap-6 mb-4">
-                <div className="relative w-24 h-24">
+              <div className="flex items-center gap-4 md:gap-6 mb-4">
+                <div className="relative w-20 h-20 md:w-24 md:h-24">
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                     <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" strokeWidth="20" 
                       strokeDasharray="235.6 263.9" />
@@ -167,15 +167,15 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-emerald-500" />
-                    <span className="text-sm text-zinc-300">94% pNode Operators + Delegators</span>
+                    <span className="text-xs md:text-sm text-zinc-300">94% Operators + Delegators</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-purple-500" />
-                    <span className="text-sm text-zinc-300">3% XAND DAO</span>
+                    <span className="text-xs md:text-sm text-zinc-300">3% XAND DAO</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-zinc-600" />
-                    <span className="text-sm text-zinc-300">3% Investors</span>
+                    <span className="text-xs md:text-sm text-zinc-300">3% Investors</span>
                   </div>
                 </div>
               </div>
@@ -192,22 +192,22 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
             {/* Right: How to Earn */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">How Rewards Work</h3>
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">How Rewards Work</h3>
               
-              <div className="space-y-3 mb-6">
-                <div className="p-4 border border-purple-500/15">
-                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Epoch Length</p>
-                  <p className="text-lg font-mono font-bold text-white">~2 days</p>
+              <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6">
+                <div className="p-3 md:p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Epoch</p>
+                  <p className="text-base md:text-lg font-mono font-bold text-white">~2 days</p>
                 </div>
-                <div className="p-4 border border-purple-500/15">
+                <div className="p-3 md:p-4 border border-purple-500/15">
                   <p className="text-[10px] text-zinc-500 uppercase mb-1">Paid In</p>
-                  <p className="text-lg font-mono font-bold text-emerald-400">SOL</p>
+                  <p className="text-base md:text-lg font-mono font-bold text-emerald-400">SOL</p>
                 </div>
               </div>
 
-              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5">
+              <div className="p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5">
                 <p className="text-xs text-emerald-400 uppercase mb-2">Your Share</p>
-                <p className="text-sm text-zinc-300">
+                <p className="text-xs md:text-sm text-zinc-300">
                   (your stake ÷ pool stake) × (pool credits ÷ network credits) × 94%
                 </p>
               </div>
@@ -219,40 +219,40 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
     if (activeTab === 'xand') {
       return (
-        <div className="p-6 border-b border-purple-500/15">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="p-4 md:p-6 border-b border-purple-500/15">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Left: Token Info */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">XAND Token</h3>
-              <p className="text-sm text-zinc-400 mb-6">
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">XAND Token</h3>
+              <p className="text-sm text-zinc-400 mb-4 md:mb-6">
                 Governance token for Xandeum. Stake to pNodes to boost their earnings and share SOL rewards.
               </p>
               
               {/* Supply Stats */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="p-4 border border-purple-500/15">
+              <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6">
+                <div className="p-3 md:p-4 border border-purple-500/15">
                   <p className="text-[10px] text-zinc-500 uppercase mb-1">Total Supply</p>
-                  <p className="text-lg font-mono font-bold text-white">4.015B</p>
+                  <p className="text-base md:text-lg font-mono font-bold text-white">4.015B</p>
                 </div>
-                <div className="p-4 border border-purple-500/15">
+                <div className="p-3 md:p-4 border border-purple-500/15">
                   <p className="text-[10px] text-zinc-500 uppercase mb-1">Circulating</p>
-                  <p className="text-lg font-mono font-bold text-emerald-400">1.3B</p>
+                  <p className="text-base md:text-lg font-mono font-bold text-emerald-400">1.3B</p>
                   <p className="text-[10px] text-zinc-600">~32%</p>
                 </div>
               </div>
 
               {/* Role */}
-              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4">
+              <div className="p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4">
                 <p className="text-xs text-emerald-400 uppercase mb-1">Your stake multiplies node earnings</p>
-                <p className="text-sm text-zinc-300">Rewards paid in SOL every ~2 days</p>
+                <p className="text-xs md:text-sm text-zinc-300">Rewards paid in SOL every ~2 days</p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 <a
                   href="https://jup.ag/swap/SOL-XAND"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 text-sm text-white bg-purple-600 hover:bg-purple-500 transition-colors"
+                  className="px-3 md:px-4 py-2 text-xs md:text-sm text-white bg-purple-600 hover:bg-purple-500 transition-colors"
                   style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
                 >
                   Buy on Jupiter
@@ -261,7 +261,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   href="https://www.xandeum.network/xand-tokenomics"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 text-sm text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
+                  className="px-3 md:px-4 py-2 text-xs md:text-sm text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
                 >
                   Tokenomics
                 </a>
@@ -270,27 +270,27 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
             {/* Right: How to Delegate */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">How to Delegate</h3>
+              <h3 className="text-base font-bold text-white mb-3 md:mb-4">How to Delegate</h3>
               
-              <div className="p-4 border border-cyan-500/20 bg-cyan-500/5 mb-6">
+              <div className="p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 mb-4 md:mb-6">
                 <p className="text-xs text-cyan-400 uppercase mb-2">Currently on DevNet</p>
-                <p className="text-sm text-zinc-300">
+                <p className="text-xs md:text-sm text-zinc-300">
                   Delegation is coordinated through Discord and the Xandeum Foundation Delegation Program (XFDP).
                 </p>
               </div>
 
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+              <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">1</span>
-                  <span className="text-sm text-zinc-300">Buy XAND on Jupiter</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Buy XAND on Jupiter</span>
                 </div>
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">2</span>
-                  <span className="text-sm text-zinc-300">Join Xandeum Discord</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Join Xandeum Discord</span>
                 </div>
-                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
                   <span className="text-purple-400 font-mono">3</span>
-                  <span className="text-sm text-zinc-300">Coordinate delegation with XFDP team</span>
+                  <span className="text-xs md:text-sm text-zinc-300">Coordinate with XFDP team</span>
                 </div>
               </div>
 
@@ -298,7 +298,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 href="https://discord.com/invite/mGAxAuwnR9" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm text-white bg-[#5865F2] hover:bg-[#4752C4] transition-colors"
+                className="inline-flex items-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm text-white bg-[#5865F2] hover:bg-[#4752C4] transition-colors"
                 style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
               >
                 Join Discord
@@ -314,13 +314,13 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
   return (
     <div className="border border-purple-500/15 bg-[#080808]">
-      {/* Tabs */}
-      <div className="flex border-b border-purple-500/15">
+      {/* Tabs - scrollable on mobile */}
+      <div className="flex border-b border-purple-500/15 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+            className={`px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === tab.id
                 ? 'text-white bg-purple-600'
                 : 'text-zinc-500 hover:text-zinc-300 hover:bg-purple-500/5'
@@ -336,8 +336,8 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
           </button>
         ))}
         
-        {/* Search - right aligned */}
-        <div className="ml-auto flex items-center px-4">
+        {/* Search - right aligned, hidden on mobile */}
+        <div className="hidden md:flex ml-auto items-center px-4">
           <input
             type="text"
             placeholder="Search address..."
@@ -348,17 +348,28 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
         </div>
       </div>
 
+      {/* Mobile Search */}
+      <div className="md:hidden p-3 border-b border-purple-500/10">
+        <input
+          type="text"
+          placeholder="Search address..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-3 py-2 text-xs bg-black border border-purple-500/20 text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500/40"
+        />
+      </div>
+
       {/* Education Content */}
       {renderEducationContent()}
 
       {/* Leaderboard Header */}
       {activeTab === 'leaderboard' && (
-        <div className="px-4 py-3 border-b border-purple-500/10 bg-black/30">
-          <div className="flex items-center justify-between">
+        <div className="px-3 md:px-4 py-2 md:py-3 border-b border-purple-500/10 bg-black/30">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
             <div>
-              <p className="text-sm text-zinc-300">
+              <p className="text-xs md:text-sm text-zinc-300">
                 <span className="text-cyan-400 font-medium">Credits</span> = storage work completed. 
-                <span className="text-zinc-500 ml-1">Higher credits = more active node = larger reward share.</span>
+                <span className="text-zinc-500 ml-1 hidden md:inline">Higher credits = more active node = larger reward share.</span>
               </p>
             </div>
             <p className="text-[10px] text-zinc-600">Click row to expand • Check to compare</p>
@@ -369,12 +380,12 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       {/* Table Header */}
       {activeTab === 'leaderboard' && (
         <>
-          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-600 border-b border-purple-500/10">
-            <div className="col-span-1">#</div>
-            <div className="col-span-1"></div>
-            <div className="col-span-5">Address</div>
-            <div className="col-span-3 text-right">Credits</div>
-            <div className="col-span-2 text-right">Activity</div>
+          <div className="grid grid-cols-12 gap-2 md:gap-4 px-3 md:px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-600 border-b border-purple-500/10">
+            <div className="col-span-2 md:col-span-1">#</div>
+            <div className="col-span-1 hidden md:block"></div>
+            <div className="col-span-6 md:col-span-5">Address</div>
+            <div className="col-span-4 md:col-span-3 text-right">Credits</div>
+            <div className="col-span-2 text-right hidden md:block">Activity</div>
           </div>
 
           {/* Rows */}
@@ -388,7 +399,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 <div key={node.id}>
                   {/* Main Row */}
                   <div
-                    className={`grid grid-cols-12 gap-4 px-4 py-3 items-center cursor-pointer transition-colors ${
+                    className={`grid grid-cols-12 gap-2 md:gap-4 px-3 md:px-4 py-2 md:py-3 items-center cursor-pointer transition-colors ${
                       isSelected 
                         ? 'bg-purple-500/10 border-l-2 border-purple-500' 
                         : 'hover:bg-purple-500/5 hover:border-l-2 hover:border-purple-500/50'
@@ -396,17 +407,31 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                     onClick={() => setExpandedId(isExpanded ? null : node.id)}
                   >
                     {/* Rank */}
-                    <div className="col-span-1">
-                      <span className={`font-mono text-sm ${
+                    <div className="col-span-2 md:col-span-1 flex items-center gap-1 md:gap-2">
+                      <span className={`font-mono text-xs md:text-sm ${
                         node.rank <= 3 ? 'text-amber-400 font-bold' : 
                         node.rank <= 10 ? 'text-white' : 'text-zinc-500'
                       }`}>
                         {node.rank}
                       </span>
+                      {/* Checkbox - inline on mobile */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleSelect(node.id);
+                        }}
+                        className={`w-4 h-4 border flex items-center justify-center transition-colors md:hidden ${
+                          isSelected
+                            ? 'bg-purple-600 border-purple-600'
+                            : 'border-zinc-700 hover:border-purple-500'
+                        }`}
+                      >
+                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                      </button>
                     </div>
 
-                    {/* Checkbox */}
-                    <div className="col-span-1">
+                    {/* Checkbox - desktop only */}
+                    <div className="col-span-1 hidden md:block">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -423,21 +448,22 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                     </div>
 
                     {/* Address */}
-                    <div className="col-span-5">
-                      <span className="font-mono text-sm text-zinc-300">
-                        {node.id.slice(0, 8)}...{node.id.slice(-6)}
+                    <div className="col-span-6 md:col-span-5">
+                      <span className="font-mono text-xs md:text-sm text-zinc-300">
+                        <span className="md:hidden">{node.id.slice(0, 4)}...{node.id.slice(-4)}</span>
+                        <span className="hidden md:inline">{node.id.slice(0, 8)}...{node.id.slice(-6)}</span>
                       </span>
                     </div>
 
                     {/* Credits */}
-                    <div className="col-span-3 text-right">
-                      <span className="font-mono text-sm font-bold text-cyan-400">
+                    <div className="col-span-4 md:col-span-3 text-right">
+                      <span className="font-mono text-xs md:text-sm font-bold text-cyan-400">
                         {node.credits.toLocaleString()}
                       </span>
                     </div>
 
-                    {/* Activity Bar */}
-                    <div className="col-span-2 flex items-center gap-2 justify-end">
+                    {/* Activity Bar - desktop only */}
+                    <div className="col-span-2 hidden md:flex items-center gap-2 justify-end">
                       <div className="w-16 h-1.5 bg-zinc-900 overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-purple-600 to-cyan-400"
@@ -452,18 +478,18 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
                   {/* Expanded Detail */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 bg-black/50">
-                      <div className="border border-purple-500/20 p-4">
+                    <div className="px-3 md:px-4 pb-3 md:pb-4 bg-black/50">
+                      <div className="border border-purple-500/20 p-3 md:p-4">
                         {/* Full Address */}
-                        <div className="mb-4">
+                        <div className="mb-3 md:mb-4">
                           <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-2">Full Address</p>
                           <div className="flex items-center gap-2">
-                            <code className="flex-1 font-mono text-xs text-zinc-400 bg-black px-3 py-2 border border-purple-500/10 break-all">
+                            <code className="flex-1 font-mono text-[10px] md:text-xs text-zinc-400 bg-black px-2 md:px-3 py-2 border border-purple-500/10 break-all">
                               {node.id}
                             </code>
                             <button
                               onClick={() => copyToClipboard(node.id, node.id)}
-                              className="p-2 border border-purple-500/20 hover:border-purple-500/40 transition-colors"
+                              className="p-2 border border-purple-500/20 hover:border-purple-500/40 transition-colors flex-shrink-0"
                             >
                               {copiedId === node.id ? (
                                 <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -474,41 +500,40 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                           </div>
                         </div>
 
-                        {/* Stats Grid with explanations */}
-                        <div className="grid grid-cols-4 gap-[1px] bg-purple-500/10 mb-4">
-                          <div className="bg-black p-3">
+                        {/* Stats Grid with explanations - 2 cols on mobile, 4 on desktop */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
+                          <div className="bg-black p-2 md:p-3">
                             <p className="text-[10px] text-zinc-600 uppercase">Rank</p>
-                            <p className="text-lg font-mono font-bold text-white">#{node.rank}</p>
+                            <p className="text-base md:text-lg font-mono font-bold text-white">#{node.rank}</p>
                             <p className="text-[10px] text-zinc-600 mt-1">
-                              {node.rank <= 10 ? '🏆 Top performer' : node.rank <= 50 ? 'Strong validator' : 'Active validator'}
+                              {node.rank <= 10 ? '🏆 Top' : node.rank <= 50 ? 'Strong' : 'Active'}
                             </p>
                           </div>
-                          <div className="bg-black p-3">
+                          <div className="bg-black p-2 md:p-3">
                             <p className="text-[10px] text-cyan-400 uppercase">Credits</p>
-                            <p className="text-lg font-mono font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Proof of activity (real data)</p>
+                            <p className="text-base md:text-lg font-mono font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">Activity proof</p>
                           </div>
-                          <div className="bg-black p-3">
-                            <p className="text-[10px] text-zinc-600 uppercase">vs Top Node</p>
-                            <p className="text-lg font-mono font-bold text-white">{activityPercent.toFixed(1)}%</p>
+                          <div className="bg-black p-2 md:p-3">
+                            <p className="text-[10px] text-zinc-600 uppercase">vs Top</p>
+                            <p className="text-base md:text-lg font-mono font-bold text-white">{activityPercent.toFixed(1)}%</p>
                             <p className="text-[10px] text-zinc-600 mt-1">
-                              {activityPercent >= 90 ? 'Near leader' : activityPercent >= 70 ? 'Competitive' : 'Room to grow'}
+                              {activityPercent >= 90 ? 'Near leader' : activityPercent >= 70 ? 'Competitive' : 'Growing'}
                             </p>
                           </div>
-                          <div className="bg-black p-3">
-                            <p className="text-[10px] text-purple-400 uppercase">Reward Share</p>
-                            <p className="text-lg font-mono font-bold text-purple-400">
+                          <div className="bg-black p-2 md:p-3">
+                            <p className="text-[10px] text-purple-400 uppercase">Share</p>
+                            <p className="text-base md:text-lg font-mono font-bold text-purple-400">
                               {((node.credits / nodes.reduce((a, n) => a + n.credits, 0)) * 100).toFixed(3)}%
                             </p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Of 94% STOINC pool</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">Of rewards</p>
                           </div>
                         </div>
 
                         {/* Data Source Notice */}
-                        <div className="p-3 border border-zinc-800 bg-zinc-900/50 mb-4">
-                          <p className="text-xs text-zinc-500">
-                            <strong className="text-zinc-400">Data from:</strong> podcredits.xandeum.network API • 
-                            Credits = successful challenge responses (proves node is online & storing data)
+                        <div className="p-2 md:p-3 border border-zinc-800 bg-zinc-900/50 mb-3 md:mb-4">
+                          <p className="text-[10px] md:text-xs text-zinc-500">
+                            <strong className="text-zinc-400">Data:</strong> podcredits.xandeum.network API
                           </p>
                         </div>
 
@@ -520,7 +545,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                         />
 
                         {/* Actions */}
-                        <div className="flex gap-2 mt-4">
+                        <div className="flex flex-wrap gap-2 mt-3 md:mt-4">
                           <a
                             href={`https://explorer.xandeum.com/address/${node.id}`}
                             target="_blank"
