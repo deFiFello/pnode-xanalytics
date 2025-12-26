@@ -1,22 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Copy, ExternalLink, Check } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Copy, ExternalLink, Check, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface PNode {
   id: string;
   credits: number;
   rank: number;
-}
-
-interface LeaderboardProps {
-  selectedIds: string[];
-  onToggleSelect: (id: string) => void;
+  ip: string | null;
+  version: string | null;
+  uptime: number | null;
+  uptimeFormatted: string | null;
+  storage_committed: number | null;
+  storage_committed_formatted: string | null;
+  storage_used: number | null;
+  storage_used_formatted: string | null;
+  last_seen_ago: string | null;
+  activityRate: number | null;
+  hasStats: boolean;
 }
 
 type TabType = 'leaderboard' | 'pnodes' | 'stoinc' | 'xand';
+type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime';
+type SortDirection = 'asc' | 'desc';
 
-export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
+export function Leaderboard() {
   const [nodes, setNodes] = useState<PNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('leaderboard');
@@ -24,6 +32,9 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showCount, setShowCount] = useState(10);
+  const [stats, setStats] = useState<any>(null);
+  const [sortColumn, setSortColumn] = useState<SortColumn>('rank');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   useEffect(() => {
     async function fetchNodes() {
@@ -36,7 +47,22 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
             id: node.id,
             credits: node.credits,
             rank: index + 1,
+            ip: node.ip || null,
+            version: node.version || null,
+            uptime: node.uptime || null,
+            uptimeFormatted: node.uptimeFormatted || null,
+            storage_committed: node.storage_committed || null,
+            storage_committed_formatted: node.storage_committed_formatted || null,
+            storage_used: node.storage_used || null,
+            storage_used_formatted: node.storage_used_formatted || null,
+            last_seen_ago: node.last_seen_ago || null,
+            activityRate: node.activityRate || null,
+            hasStats: node.hasStats || false,
           })));
+          
+          if (data.stats) {
+            setStats(data.stats);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch nodes:', error);
@@ -50,13 +76,63 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
   const maxCredits = nodes.length > 0 ? nodes[0].credits : 1;
 
-  const filteredNodes = nodes.filter(node =>
-    node.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      // Default directions: rank asc, others desc (highest first)
+      setSortDirection(column === 'rank' ? 'asc' : 'desc');
+    }
+  };
+
+  const sortedNodes = useMemo(() => {
+    const filtered = nodes.filter(node =>
+      node.id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return [...filtered].sort((a, b) => {
+      let aVal: number;
+      let bVal: number;
+
+      switch (sortColumn) {
+        case 'rank':
+          aVal = a.rank;
+          bVal = b.rank;
+          break;
+        case 'credits':
+          aVal = a.credits;
+          bVal = b.credits;
+          break;
+        case 'activity':
+          aVal = a.activityRate || 0;
+          bVal = b.activityRate || 0;
+          break;
+        case 'version':
+          // Sort by version string numerically
+          aVal = parseFloat(a.version?.replace('v', '') || '0');
+          bVal = parseFloat(b.version?.replace('v', '') || '0');
+          break;
+        case 'uptime':
+          aVal = a.uptime || 0;
+          bVal = b.uptime || 0;
+          break;
+        default:
+          aVal = a.rank;
+          bVal = b.rank;
+      }
+
+      if (sortDirection === 'asc') {
+        return aVal - bVal;
+      } else {
+        return bVal - aVal;
+      }
+    });
+  }, [nodes, searchQuery, sortColumn, sortDirection]);
 
   const displayNodes = activeTab === 'leaderboard' 
-    ? filteredNodes.slice(0, showCount) 
-    : filteredNodes.slice(0, 10);
+    ? sortedNodes.slice(0, showCount) 
+    : sortedNodes.slice(0, 10);
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -67,6 +143,15 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   const getActivityBar = (credits: number) => {
     const ratio = (credits / maxCredits) * 100;
     return ratio;
+  };
+
+  const SortIcon = ({ column }: { column: SortColumn }) => {
+    if (sortColumn !== column) {
+      return <ChevronDown className="h-3 w-3 text-zinc-700" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ChevronUp className="h-3 w-3 text-purple-400" />
+      : <ChevronDown className="h-3 w-3 text-purple-400" />;
   };
 
   const tabs: { id: TabType; label: string }[] = [
@@ -97,7 +182,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
             <div>
               <h3 className="text-base font-bold text-white mb-3 md:mb-4">What is a pNode?</h3>
               <p className="text-sm text-zinc-400 mb-4">
-                A storage server that earns SOL by hosting data for Solana apps.
+                pNodes are Xandeum's decentralized storage layer — adding the "hard drive" to Solana's world computer.
               </p>
               <div className="space-y-2 md:space-y-3">
                 <div className="flex items-center gap-3 p-2 md:p-3 border border-purple-500/15">
@@ -112,6 +197,12 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   <span className="text-purple-400 font-mono">3</span>
                   <span className="text-xs md:text-sm text-zinc-300">Gets paid SOL based on credits earned</span>
                 </div>
+              </div>
+              
+              {/* Network milestone */}
+              <div className="mt-4 p-3 border border-emerald-500/20 bg-emerald-500/5">
+                <p className="text-xs text-emerald-400">✓ 300 pNodes sold out</p>
+                <p className="text-[10px] text-zinc-500 mt-1">Strong early demand from operators</p>
               </div>
             </div>
 
@@ -225,7 +316,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
             <div>
               <h3 className="text-base font-bold text-white mb-3 md:mb-4">XAND Token</h3>
               <p className="text-sm text-zinc-400 mb-4 md:mb-6">
-                Governance token for Xandeum. Stake to pNodes to boost their earnings and share SOL rewards.
+                Governance token for Xandeum DAO. Stake to pNodes to boost their earnings and share SOL rewards.
               </p>
               
               {/* Supply Stats */}
@@ -238,6 +329,18 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   <p className="text-[10px] text-zinc-500 uppercase mb-1">Circulating</p>
                   <p className="text-base md:text-lg font-mono font-bold text-emerald-400">1.3B</p>
                   <p className="text-[10px] text-zinc-600">~32%</p>
+                </div>
+              </div>
+
+              {/* Verified Project Stats */}
+              <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6">
+                <div className="p-3 md:p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Raised</p>
+                  <p className="text-base font-mono font-bold text-purple-400">$2.8M</p>
+                </div>
+                <div className="p-3 md:p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">DevNet TXs</p>
+                  <p className="text-base font-mono font-bold text-cyan-400">4B+</p>
                 </div>
               </div>
 
@@ -273,9 +376,9 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
               <h3 className="text-base font-bold text-white mb-3 md:mb-4">How to Delegate</h3>
               
               <div className="p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 mb-4 md:mb-6">
-                <p className="text-xs text-cyan-400 uppercase mb-2">Currently on DevNet</p>
+                <p className="text-xs text-cyan-400 uppercase mb-2">Before Mainnet</p>
                 <p className="text-xs md:text-sm text-zinc-300">
-                  Delegation is coordinated through Discord and the Xandeum Foundation Delegation Program (XFDP).
+                  Delegation coordinated through Discord and the Foundation Delegation Program (XFDP). Public staking coming with mainnet.
                 </p>
               </div>
 
@@ -368,11 +471,11 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
             <div>
               <p className="text-xs md:text-sm text-zinc-300">
-                <span className="text-cyan-400 font-medium">Credits</span> = storage work completed. 
-                <span className="text-zinc-500 ml-1 hidden md:inline">Higher credits = more active node = larger reward share.</span>
+                <span className="text-cyan-400 font-medium">Credits</span> = storage proofs verified. 
+                <span className="text-zinc-500 ml-1 hidden md:inline">Higher credits = more work done = larger reward share.</span>
               </p>
             </div>
-            <p className="text-[10px] text-zinc-600">Click row to expand • Check to compare</p>
+            <p className="text-[10px] text-zinc-600">Click headers to sort • Click row for details</p>
           </div>
         </div>
       )}
@@ -381,18 +484,50 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       {activeTab === 'leaderboard' && (
         <>
           <div className="grid grid-cols-12 gap-2 md:gap-4 px-3 md:px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-600 border-b border-purple-500/10">
-            <div className="col-span-2 md:col-span-1">#</div>
-            <div className="col-span-1 hidden md:block"></div>
-            <div className="col-span-6 md:col-span-5">Address</div>
-            <div className="col-span-4 md:col-span-3 text-right">Credits</div>
-            <div className="col-span-2 text-right hidden md:block">Activity</div>
+            <button 
+              onClick={() => handleSort('rank')}
+              className="col-span-2 md:col-span-1 flex items-center gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>#</span>
+              <SortIcon column="rank" />
+            </button>
+            <div className="col-span-5 md:col-span-4">Address</div>
+            <button 
+              onClick={() => handleSort('credits')}
+              className="col-span-5 md:col-span-2 flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Credits</span>
+              <span className="hidden md:inline text-zinc-700 normal-case">work done</span>
+              <SortIcon column="credits" />
+            </button>
+            <button 
+              onClick={() => handleSort('activity')}
+              className="col-span-2 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Activity</span>
+              <span className="text-zinc-700 normal-case">/day</span>
+              <SortIcon column="activity" />
+            </button>
+            <button 
+              onClick={() => handleSort('version')}
+              className="col-span-1 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Version</span>
+              <SortIcon column="version" />
+            </button>
+            <button 
+              onClick={() => handleSort('uptime')}
+              className="col-span-2 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Uptime</span>
+              <SortIcon column="uptime" />
+            </button>
           </div>
 
           {/* Rows */}
           <div className="divide-y divide-purple-500/10">
             {displayNodes.map((node) => {
               const isExpanded = expandedId === node.id;
-              const isSelected = selectedIds.includes(node.id);
               const activityPercent = getActivityBar(node.credits);
 
               return (
@@ -400,78 +535,55 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   {/* Main Row */}
                   <div
                     className={`grid grid-cols-12 gap-2 md:gap-4 px-3 md:px-4 py-2 md:py-3 items-center cursor-pointer transition-colors ${
-                      isSelected 
+                      isExpanded 
                         ? 'bg-purple-500/10 border-l-2 border-purple-500' 
                         : 'hover:bg-purple-500/5 hover:border-l-2 hover:border-purple-500/50'
                     }`}
                     onClick={() => setExpandedId(isExpanded ? null : node.id)}
                   >
                     {/* Rank */}
-                    <div className="col-span-2 md:col-span-1 flex items-center gap-1 md:gap-2">
+                    <div className="col-span-2 md:col-span-1">
                       <span className={`font-mono text-xs md:text-sm ${
                         node.rank <= 3 ? 'text-amber-400 font-bold' : 
                         node.rank <= 10 ? 'text-white' : 'text-zinc-500'
                       }`}>
                         {node.rank}
                       </span>
-                      {/* Checkbox - inline on mobile */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleSelect(node.id);
-                        }}
-                        className={`w-4 h-4 border flex items-center justify-center transition-colors md:hidden ${
-                          isSelected
-                            ? 'bg-purple-600 border-purple-600'
-                            : 'border-zinc-700 hover:border-purple-500'
-                        }`}
-                      >
-                        {isSelected && <Check className="h-3 w-3 text-white" />}
-                      </button>
-                    </div>
-
-                    {/* Checkbox - desktop only */}
-                    <div className="col-span-1 hidden md:block">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleSelect(node.id);
-                        }}
-                        className={`w-4 h-4 border flex items-center justify-center transition-colors ${
-                          isSelected
-                            ? 'bg-purple-600 border-purple-600'
-                            : 'border-zinc-700 hover:border-purple-500'
-                        }`}
-                      >
-                        {isSelected && <Check className="h-3 w-3 text-white" />}
-                      </button>
                     </div>
 
                     {/* Address */}
-                    <div className="col-span-6 md:col-span-5">
+                    <div className="col-span-5 md:col-span-4">
                       <span className="font-mono text-xs md:text-sm text-zinc-300">
                         <span className="md:hidden">{node.id.slice(0, 4)}...{node.id.slice(-4)}</span>
-                        <span className="hidden md:inline">{node.id.slice(0, 8)}...{node.id.slice(-6)}</span>
+                        <span className="hidden md:inline">{node.id.slice(0, 8)}...{node.id.slice(-4)}</span>
                       </span>
                     </div>
 
                     {/* Credits */}
-                    <div className="col-span-4 md:col-span-3 text-right">
+                    <div className="col-span-5 md:col-span-2 text-right">
                       <span className="font-mono text-xs md:text-sm font-bold text-cyan-400">
                         {node.credits.toLocaleString()}
                       </span>
                     </div>
 
-                    {/* Activity Bar - desktop only */}
-                    <div className="col-span-2 hidden md:flex items-center gap-2 justify-end">
-                      <div className="w-16 h-1.5 bg-zinc-900 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-purple-600 to-cyan-400"
-                          style={{ width: `${activityPercent}%` }}
-                        />
-                      </div>
-                      <span className="font-mono text-[10px] text-zinc-500 w-8 text-right">
-                        {activityPercent.toFixed(0)}%
+                    {/* Activity Rate - desktop only */}
+                    <div className="col-span-2 hidden md:block text-right">
+                      <span className={`font-mono text-xs ${node.activityRate ? 'text-purple-400' : 'text-zinc-600'}`}>
+                        {node.activityRate ? `${node.activityRate.toLocaleString()}/d` : '—'}
+                      </span>
+                    </div>
+
+                    {/* Version - desktop only */}
+                    <div className="col-span-1 hidden md:block text-right">
+                      <span className={`font-mono text-xs ${node.version ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                        {node.version ? node.version.split('-')[0] : '—'}
+                      </span>
+                    </div>
+
+                    {/* Uptime - desktop only */}
+                    <div className="col-span-2 hidden md:block text-right">
+                      <span className={`font-mono text-xs ${node.uptimeFormatted ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                        {node.uptimeFormatted || '—'}
                       </span>
                     </div>
                   </div>
@@ -480,9 +592,16 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   {isExpanded && (
                     <div className="px-3 md:px-4 pb-3 md:pb-4 bg-black/50">
                       <div className="border border-purple-500/20 p-3 md:p-4">
-                        {/* Full Address */}
+                        {/* Full Address + IP */}
                         <div className="mb-3 md:mb-4">
-                          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-2">Full Address</p>
+                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-600">Full Address</p>
+                            {node.ip && (
+                              <span className="text-[10px] text-zinc-500">
+                                IP: <span className="font-mono text-zinc-400">{node.ip}</span>
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2">
                             <code className="flex-1 font-mono text-[10px] md:text-xs text-zinc-400 bg-black px-2 md:px-3 py-2 border border-purple-500/10 break-all">
                               {node.id}
@@ -500,42 +619,73 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                           </div>
                         </div>
 
-                        {/* Stats Grid with explanations - 2 cols on mobile, 4 on desktop */}
+                        {/* Performance Overview */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
                           <div className="bg-black p-2 md:p-3">
                             <p className="text-[10px] text-zinc-600 uppercase">Rank</p>
                             <p className="text-base md:text-lg font-mono font-bold text-white">#{node.rank}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">
-                              {node.rank <= 10 ? '🏆 Top' : node.rank <= 50 ? 'Strong' : 'Active'}
+                            <p className="text-[10px] text-zinc-500 mt-1">
+                              {node.rank <= 3 ? 'Top 3 — highest performers' : node.rank <= 10 ? 'Top 10 — excellent track record' : `#${node.rank} of ${nodes.length}`}
                             </p>
                           </div>
                           <div className="bg-black p-2 md:p-3">
                             <p className="text-[10px] text-cyan-400 uppercase">Credits</p>
                             <p className="text-base md:text-lg font-mono font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Activity proof</p>
+                            <p className="text-[10px] text-zinc-500 mt-1">Work verified = rewards earned</p>
                           </div>
                           <div className="bg-black p-2 md:p-3">
-                            <p className="text-[10px] text-zinc-600 uppercase">vs Top</p>
-                            <p className="text-base md:text-lg font-mono font-bold text-white">{activityPercent.toFixed(1)}%</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">
-                              {activityPercent >= 90 ? 'Near leader' : activityPercent >= 70 ? 'Competitive' : 'Growing'}
+                            <p className="text-[10px] text-emerald-400 uppercase">Uptime</p>
+                            <p className={`text-base md:text-lg font-mono font-bold ${node.uptimeFormatted ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                              {node.uptimeFormatted || '—'}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 mt-1">
+                              {node.uptime && node.uptime > 86400 * 7 ? 'Reliable — 7+ days continuously' : node.uptime ? 'Time continuously online' : 'Connecting...'}
                             </p>
                           </div>
                           <div className="bg-black p-2 md:p-3">
-                            <p className="text-[10px] text-purple-400 uppercase">Share</p>
+                            <p className="text-[10px] text-purple-400 uppercase">Network Share</p>
                             <p className="text-base md:text-lg font-mono font-bold text-purple-400">
                               {((node.credits / nodes.reduce((a, n) => a + n.credits, 0)) * 100).toFixed(3)}%
                             </p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Of rewards</p>
+                            <p className="text-[10px] text-zinc-500 mt-1">This node's cut of rewards</p>
                           </div>
                         </div>
 
-                        {/* Data Source Notice */}
-                        <div className="p-2 md:p-3 border border-zinc-800 bg-zinc-900/50 mb-3 md:mb-4">
-                          <p className="text-[10px] md:text-xs text-zinc-500">
-                            <strong className="text-zinc-400">Data:</strong> podcredits.xandeum.network API
-                          </p>
-                        </div>
+                        {/* Additional Stats (if available) */}
+                        {node.hasStats && (
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
+                            <div className="bg-black p-2 md:p-3">
+                              <p className="text-[10px] text-zinc-600 uppercase">Activity Rate</p>
+                              <p className="text-sm font-mono text-purple-400">
+                                {node.activityRate ? `${node.activityRate.toLocaleString()}/d` : '—'}
+                              </p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Higher = earning faster</p>
+                            </div>
+                            <div className="bg-black p-2 md:p-3">
+                              <p className="text-[10px] text-zinc-600 uppercase">Version</p>
+                              <p className="text-sm font-mono text-zinc-300">{node.version?.split('-')[0] || '—'}</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Latest = well maintained</p>
+                            </div>
+                            <div className="bg-black p-2 md:p-3">
+                              <p className="text-[10px] text-zinc-600 uppercase">Storage</p>
+                              <p className="text-sm font-mono text-zinc-300">{node.storage_committed_formatted || '—'}</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Capacity they contribute</p>
+                            </div>
+                            <div className="bg-black p-2 md:p-3">
+                              <p className="text-[10px] text-zinc-600 uppercase">Last Seen</p>
+                              <p className={`text-sm font-mono ${
+                                node.last_seen_ago?.includes('Just') || node.last_seen_ago?.includes('m ago')
+                                  ? 'text-emerald-400'
+                                  : node.last_seen_ago?.includes('h ago')
+                                    ? 'text-yellow-400'
+                                    : 'text-zinc-500'
+                              }`}>
+                                {node.last_seen_ago || '—'}
+                              </p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Recent = actively earning</p>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Stake Calculator */}
                         <StakeCalculator 
@@ -553,7 +703,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                             className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
                           >
                             <ExternalLink className="h-3.5 w-3.5" />
-                            Explorer
+                            View on Explorer
                           </a>
                           <a
                             href="https://discord.gg/xandeum"
@@ -562,7 +712,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                             className="flex items-center gap-2 px-3 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
                             style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
                           >
-                            Delegate via Discord
+                            Start Delegating →
                           </a>
                         </div>
                       </div>
@@ -577,14 +727,14 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
           <div className="px-4 py-3 border-t border-purple-500/10">
             <div className="flex items-center justify-between">
               <p className="text-xs text-zinc-600">
-                Showing {displayNodes.length} of {nodes.length} validators
+                Showing {displayNodes.length} of {sortedNodes.length} validators
               </p>
-              {showCount < nodes.length && (
+              {showCount < sortedNodes.length && (
                 <button
-                  onClick={() => setShowCount(prev => Math.min(prev + 15, nodes.length))}
+                  onClick={() => setShowCount(prev => Math.min(prev + 15, sortedNodes.length))}
                   className="px-4 py-2 text-xs text-purple-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
                 >
-                  Load More ({Math.min(15, nodes.length - showCount)} more)
+                  Load More ({Math.min(15, sortedNodes.length - showCount)} more)
                 </button>
               )}
             </div>
@@ -597,66 +747,61 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
 
 // Node Performance Details Component
 function StakeCalculator({ nodeCredits, totalNetworkCredits, nodeCount }: { nodeCredits: number; totalNetworkCredits: number; nodeCount: number }) {
-  const poolNetworkShare = (nodeCredits / totalNetworkCredits) * 100;
   const avgCredits = totalNetworkCredits / nodeCount;
-  const vsAverage = (nodeCredits / avgCredits) * 100;
+  const vsAverage = ((nodeCredits / avgCredits) - 1) * 100;
 
   return (
-    <div className="p-4 border border-purple-500/15 bg-[#080808]">
-      <div className="grid grid-cols-2 gap-6">
-        {/* Left: Performance Metrics */}
-        <div>
-          <p className="text-xs text-purple-400 uppercase mb-3">Performance Metrics</p>
-          <div className="space-y-2">
-            <div className="p-3 border border-purple-500/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-500">Credits Earned</span>
-                <span className="text-sm font-mono text-cyan-400">{nodeCredits.toLocaleString()}</span>
-              </div>
-              <p className="text-[10px] text-zinc-600">Storage work completed this epoch</p>
-            </div>
-            <div className="p-3 border border-purple-500/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-500">Network Share</span>
-                <span className="text-sm font-mono text-purple-400">{poolNetworkShare.toFixed(3)}%</span>
-              </div>
-              <p className="text-[10px] text-zinc-600">This node's portion of total rewards</p>
-            </div>
-            <div className="p-3 border border-purple-500/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-500">vs Average</span>
-                <span className={`text-sm font-mono ${vsAverage >= 100 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {vsAverage >= 100 ? '+' : ''}{(vsAverage - 100).toFixed(0)}%
-                </span>
-              </div>
-              <p className="text-[10px] text-zinc-600">Compared to network average ({Math.round(avgCredits).toLocaleString()} credits)</p>
-            </div>
+    <div className="p-3 md:p-4 border border-purple-500/15 bg-[#080808]">
+      {/* vs Average highlight */}
+      <div className="mb-3 md:mb-4 p-3 border border-purple-500/10 bg-purple-500/5">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs text-zinc-400">Performance vs Network</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">
+              {vsAverage >= 20 ? 'Outperforming most nodes' : vsAverage >= 0 ? 'Above average performer' : 'Below network average'}
+            </p>
           </div>
+          <span className={`text-lg font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}%
+          </span>
         </div>
+      </div>
 
-        {/* Right: Coming with Mainnet */}
-        <div>
-          <p className="text-xs text-cyan-400 uppercase mb-3">Coming with Mainnet</p>
-          <div className="space-y-2">
-            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
-              <span className="text-sm text-zinc-400">Pool total stake</span>
-            </div>
-            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
-              <span className="text-sm text-zinc-400">Number of delegators</span>
-            </div>
-            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
-              <span className="text-sm text-zinc-400">Your projected share calculator</span>
-            </div>
-            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
-              <span className="text-sm text-zinc-400">Historical rewards tracking</span>
-            </div>
+      {/* What's Coming */}
+      <div>
+        <p className="text-[10px] text-cyan-400 uppercase mb-2">Coming with Mainnet</p>
+        <p className="text-xs text-zinc-500 mb-3">These features unlock when public delegation goes live:</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">Pool stake total</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">XAND delegated to this node</p>
+          </div>
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">Delegator count</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">More = smaller individual share</p>
+          </div>
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">APY estimate</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">Projected annual return</p>
+          </div>
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">Projected earnings</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">Your share based on stake</p>
+          </div>
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">Reward history</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">SOL distributions over time</p>
+          </div>
+          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
+            <span className="text-xs text-zinc-500">Operator fee</span>
+            <p className="text-[10px] text-zinc-600 mt-0.5">% kept by node operator</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 p-3 border-l-2 border-purple-500 bg-purple-500/5">
+      <div className="mt-3 md:mt-4 p-2 md:p-3 border-l-2 border-purple-500 bg-purple-500/5">
         <p className="text-xs text-zinc-400">
-          <strong className="text-purple-400">Ready to delegate?</strong> Join the Xandeum Discord to coordinate with the Foundation Delegation Program.
+          <strong className="text-purple-400">Want early access?</strong> Join Discord to coordinate with the Foundation Delegation Program.
         </p>
       </div>
     </div>

@@ -1,4 +1,9 @@
 import { NextResponse } from 'next/server';
+// @ts-ignore
+import fetch from 'node-fetch';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface PodCredit {
   pod_id: string;
@@ -10,18 +15,99 @@ interface PodCreditsResponse {
   status: string;
 }
 
+interface PrpcNode {
+  address: string;
+  is_public: boolean;
+  last_seen_timestamp: number;
+  pubkey: string;
+  rpc_port: number;
+  storage_committed: number;
+  storage_usage_percent: number;
+  storage_used: number;
+  uptime: number;
+  version: string;
+}
+
+// 192.190.136.36 confirmed working - put it first
+const PUBLIC_PRPC_NODES = [
+  '192.190.136.36',
+  '207.244.255.1',
+  '161.97.97.41',
+  '62.171.138.27',
+];
+
+function formatUptime(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h`;
+  return `${Math.floor(seconds / 60)}m`;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes >= 1e12) return `${(bytes / 1e12).toFixed(2)} TB`;
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
+  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(2)} MB`;
+  return `${bytes} B`;
+}
+
+async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
+  const statsMap = new Map<string, PrpcNode>();
+  
+  for (const ip of PUBLIC_PRPC_NODES) {
+    try {
+      console.log(`Trying pRPC at ${ip}:6000...`);
+      
+      const res = await fetch(`http://${ip}:6000/rpc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'get-pods-with-stats',
+          id: 1
+        }),
+        timeout: 30000, // 30 second timeout
+      });
+      
+      const text = await res.text();
+      
+      if (text === 'Host not allowed') {
+        console.log(`${ip}: Host not allowed`);
+        continue;
+      }
+      
+      const data = JSON.parse(text);
+      const pods = data.result?.pods || data.result;
+      if (pods && pods.length > 10) {
+        pods.forEach((node: PrpcNode) => {
+          statsMap.set(node.pubkey, node);
+        });
+        console.log(`pRPC SUCCESS: Got ${pods.length} nodes from ${ip}`);
+        break;
+      }
+    } catch (err: any) {
+      console.log(`pRPC ${ip} failed:`, err.message || err);
+      continue;
+    }
+  }
+  
+  return statsMap;
+}
+
 export async function GET() {
   try {
-    // Fetch REAL pNode data from Xandeum pRPC
-    const creditsResponse = await fetch('https://podcredits.xandeum.network/api/pods-credits', {
+    // Fetch credits (use global fetch for HTTPS)
+    const creditsResponse = await globalThis.fetch('https://podcredits.xandeum.network/api/pods-credits', {
       headers: { 'Accept': 'application/json' },
-      next: { revalidate: 60 },
     });
 
-    // Fetch epoch from DevNet RPC
+    // Fetch pRPC stats (uses node-fetch for HTTP port 6000)
+    const prpcStats = await fetchPrpcStats();
+
+    // Fetch epoch
     let currentEpoch = 0;
     try {
-      const epochResponse = await fetch('https://api.devnet.xandeum.com:8899', {
+      const epochResponse = await globalThis.fetch('https://api.devnet.xandeum.com:8899', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -29,7 +115,6 @@ export async function GET() {
           id: 1,
           method: 'getEpochInfo',
         }),
-        next: { revalidate: 60 },
       });
       const epochData = await epochResponse.json();
       currentEpoch = epochData.result?.epoch || 0;
@@ -38,35 +123,100 @@ export async function GET() {
     }
 
     if (!creditsResponse.ok) {
-      throw new Error(`API responded with status: ${creditsResponse.status}`);
+      throw new Error(`Credits API responded with status: ${creditsResponse.status}`);
     }
 
     const data: PodCreditsResponse = await creditsResponse.json();
     
     if (data.status === 'success' && data.pods_credits?.length > 0) {
-      // Sort by credits (descending) and map to clean structure
       const sortedNodes = data.pods_credits
         .filter(p => p.credits > 0)
         .sort((a, b) => b.credits - a.credits);
 
       const totalCredits = sortedNodes.reduce((sum, p) => sum + p.credits, 0);
 
-      // Return ONLY real data from API
-      const nodes = sortedNodes.map((pod, index) => ({
-        id: pod.pod_id,           // Real: pNode public key
-        credits: pod.credits,     // Real: activity credits from network
-        rank: index + 1,          // Derived: position by credits
-      }));
+      const nodes = sortedNodes.map((pod, index) => {
+        const stats = prpcStats.get(pod.pod_id);
+        
+        // Calculate time since last seen
+        let lastSeenAgo = null;
+        if (stats?.last_seen_timestamp) {
+          const secondsAgo = Math.floor(Date.now() / 1000) - stats.last_seen_timestamp;
+          if (secondsAgo < 60) lastSeenAgo = 'Just now';
+          else if (secondsAgo < 3600) lastSeenAgo = `${Math.floor(secondsAgo / 60)}m ago`;
+          else if (secondsAgo < 86400) lastSeenAgo = `${Math.floor(secondsAgo / 3600)}h ago`;
+          else lastSeenAgo = `${Math.floor(secondsAgo / 86400)}d ago`;
+        }
+        
+        return {
+          id: pod.pod_id,
+          credits: pod.credits,
+          rank: index + 1,
+          ip: stats?.address?.split(':')[0] || null,
+          version: stats?.version || null,
+          uptime: stats?.uptime || null,
+          uptimeFormatted: stats?.uptime ? formatUptime(stats.uptime) : null,
+          storage_committed: stats?.storage_committed || null,
+          storage_committed_formatted: stats?.storage_committed ? formatBytes(stats.storage_committed) : null,
+          storage_used: stats?.storage_used || null,
+          storage_used_formatted: stats?.storage_used ? formatBytes(stats.storage_used) : null,
+          last_seen_timestamp: stats?.last_seen_timestamp || null,
+          last_seen_ago: lastSeenAgo,
+          activityRate: stats?.uptime && stats.uptime > 0 
+            ? Math.round(pod.credits / (stats.uptime / 86400)) 
+            : null,
+          hasStats: !!stats,
+        };
+      });
+
+      const nodesWithStats = nodes.filter(n => n.hasStats).length;
+      const totalStorage = nodes.reduce((sum, n) => sum + (n.storage_committed || 0), 0);
+      const totalStorageUsed = nodes.reduce((sum, n) => sum + (n.storage_used || 0), 0);
+      
+      // Calculate average uptime (only for nodes with stats)
+      const uptimes = nodes.filter(n => n.uptime).map(n => n.uptime as number);
+      const avgUptime = uptimes.length > 0 ? uptimes.reduce((a, b) => a + b, 0) / uptimes.length : 0;
+      
+      // Calculate average activity rate
+      const activityRates = nodes.filter(n => n.activityRate).map(n => n.activityRate as number);
+      const avgActivityRate = activityRates.length > 0 
+        ? Math.round(activityRates.reduce((a, b) => a + b, 0) / activityRates.length) 
+        : 0;
+      
+      // Version distribution - extract base version (before any dash)
+      const versions = nodes.filter(n => n.version).map(n => (n.version as string).split('-')[0]);
+      const versionCounts = versions.reduce((acc, v) => {
+        acc[v] = (acc[v] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      // Find most common version
+      const sortedVersions = Object.entries(versionCounts).sort((a, b) => b[1] - a[1]);
+      const latestVersion = sortedVersions.length > 0 ? sortedVersions[0][0] : null;
+      const onLatestVersion = latestVersion ? versionCounts[latestVersion] : 0;
 
       return NextResponse.json({
         success: true,
-        source: 'podcredits.xandeum.network',
-        dataType: 'pRPC (real network data)',
+        source: prpcStats.size > 0 ? 'podcredits + pRPC' : 'podcredits.xandeum.network',
         count: nodes.length,
         nodes,
         totalCredits,
         epoch: currentEpoch,
         timestamp: new Date().toISOString(),
+        stats: {
+          nodesWithStats,
+          totalStorage,
+          totalStorageFormatted: formatBytes(totalStorage),
+          totalStorageUsed,
+          totalStorageUsedFormatted: formatBytes(totalStorageUsed),
+          avgUptime,
+          avgUptimeFormatted: formatUptime(avgUptime),
+          avgActivityRate,
+          avgActivityRateFormatted: `${avgActivityRate.toLocaleString()}/day`,
+          latestVersion,
+          onLatestVersion,
+          prpcSource: prpcStats.size > 0 ? 'live' : 'unavailable',
+        }
       });
     }
 
@@ -76,8 +226,7 @@ export async function GET() {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch from pRPC endpoint',
-      source: 'error',
+      error: 'Failed to fetch data',
       count: 0,
       nodes: [],
       totalCredits: 0,

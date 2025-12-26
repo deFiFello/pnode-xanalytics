@@ -9,6 +9,14 @@ interface NetworkStats {
   priceChange: number;
   marketCap: number;
   epoch: number;
+  // pRPC stats
+  totalStorage: string;
+  totalStorageUsed: string;
+  avgUptime: string;
+  avgActivityRate: string;
+  latestVersion: string | null;
+  onLatestVersion: number;
+  prpcSource: string;
 }
 
 export function NetworkOverview() {
@@ -19,6 +27,13 @@ export function NetworkOverview() {
     priceChange: 0,
     marketCap: 0,
     epoch: 0,
+    totalStorage: '—',
+    totalStorageUsed: '—',
+    avgUptime: '—',
+    avgActivityRate: '—',
+    latestVersion: null,
+    onLatestVersion: 0,
+    prpcSource: 'loading',
   });
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +55,14 @@ export function NetworkOverview() {
           priceChange: priceData.xandeum?.usd_24h_change || 0,
           marketCap: priceData.xandeum?.usd_market_cap || 0,
           epoch: nodesData.epoch || 0,
+          // pRPC stats
+          totalStorage: nodesData.stats?.totalStorageFormatted || '—',
+          totalStorageUsed: nodesData.stats?.totalStorageUsedFormatted || '—',
+          avgUptime: nodesData.stats?.avgUptimeFormatted || '—',
+          avgActivityRate: nodesData.stats?.avgActivityRateFormatted || '—',
+          latestVersion: nodesData.stats?.latestVersion || null,
+          onLatestVersion: nodesData.stats?.onLatestVersion || 0,
+          prpcSource: nodesData.stats?.prpcSource || 'unavailable',
         });
       } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -59,109 +82,130 @@ export function NetworkOverview() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="border border-purple-500/15 bg-[#080808]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-            Pnode Xanalytics
-          </h1>
-          <p className="text-xs md:text-sm text-zinc-500">
-            Earn Solana for strengthening Xandeum's Storage Network
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <a
-            href="https://docs.xandeum.network"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 text-xs text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
-            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
-          >
-            Docs
-          </a>
-          <a
-            href="https://discord.gg/xandeum"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
-            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
-          >
-            Discord
-          </a>
-        </div>
-      </div>
-
-      {/* Stats Grid - Responsive */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-[1px] bg-purple-500/10">
-        {/* pNodes */}
-        <div className="bg-black p-3 md:p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-600">pNodes</p>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-[8px] text-emerald-400">LIVE</span>
-            </span>
+      <div className="p-4 md:p-6 border-b border-purple-500/10">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-[-0.02em] mb-2">
+              Pnode Xanalytics
+            </h1>
+            <p className="text-sm md:text-base text-zinc-400 max-w-xl">
+              Analytics dashboard for Xandeum's pNode storage network. Stake XAND. Earn SOL.
+            </p>
           </div>
-          {loading ? (
-            <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
-          ) : (
-            <p className="text-lg md:text-xl font-mono font-bold text-white">{stats.activeNodes}</p>
-          )}
-          <p className="text-[10px] text-purple-400 mt-1">Active</p>
-        </div>
-
-        {/* Credits */}
-        <div className="bg-black p-3 md:p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Credits</p>
-          {loading ? (
-            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
-          ) : (
-            <p className="text-lg md:text-xl font-mono font-bold text-cyan-400">{formatNumber(stats.totalCredits)}</p>
-          )}
-          <p className="text-[10px] text-zinc-500 mt-1">Network total</p>
-        </div>
-
-        {/* XAND Price */}
-        <div className="bg-black p-3 md:p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">XAND</p>
-          {loading ? (
-            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
-          ) : (
-            <p className="text-lg md:text-xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
-          )}
-          <p className={`text-[10px] mt-1 font-mono ${stats.priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}%
-          </p>
-        </div>
-
-        {/* Market Cap */}
-        <div className="bg-black p-3 md:p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Mkt Cap</p>
-          {loading ? (
-            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
-          ) : (
-            <p className="text-lg md:text-xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
-          )}
-          <p className="text-[10px] text-zinc-500 mt-1">Circulating</p>
-        </div>
-
-        {/* Epoch - spans 2 cols on mobile to fill row */}
-        <div className="bg-black p-3 md:p-4 col-span-2 md:col-span-1">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Epoch</p>
-          {loading ? (
-            <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
-          ) : (
-            <p className="text-lg md:text-xl font-mono font-bold text-white">{stats.epoch}</p>
-          )}
-          <p className="text-[10px] text-zinc-500 mt-1">~2 days each</p>
+          <div className="flex gap-2 flex-shrink-0">
+            <a
+              href="https://docs.xandeum.network"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 text-xs text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
+              style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+            >
+              Docs
+            </a>
+            <a
+              href="https://discord.gg/xandeum"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
+              style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+            >
+              Join Discord
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Data Source - hidden on mobile, shown on md+ */}
-      <div className="hidden md:flex items-center justify-between text-[10px] text-zinc-600 px-1">
-        <span>Data: podcredits.xandeum.network • CoinGecko • DevNet RPC</span>
-        <span>Updated in real-time</span>
+      {/* Main Stats - Two Sections */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-purple-500/10">
+        {/* Left: Network Stats */}
+        <div className="bg-[#080808] p-4 md:p-5">
+          <p className="text-[10px] uppercase tracking-wider text-purple-400 mb-3">Network</p>
+          
+          <div className="grid grid-cols-3 gap-3">
+            {/* pNodes */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="text-[9px] text-emerald-400 uppercase">Live</span>
+              </div>
+              {loading ? (
+                <div className="h-7 w-12 bg-zinc-900 animate-pulse" />
+              ) : (
+                <p className="text-xl md:text-2xl font-mono font-bold text-white">{stats.activeNodes}</p>
+              )}
+              <p className="text-[10px] text-zinc-500 mt-0.5">pNodes earning SOL</p>
+            </div>
+
+            {/* Storage */}
+            <div>
+              {loading ? (
+                <div className="h-7 w-16 bg-zinc-900 animate-pulse mt-4" />
+              ) : (
+                <p className="text-xl md:text-2xl font-mono font-bold text-cyan-400 mt-4">{stats.totalStorage}</p>
+              )}
+              <p className="text-[10px] text-zinc-500 mt-0.5">Committed storage</p>
+            </div>
+
+            {/* Uptime */}
+            <div>
+              {loading ? (
+                <div className="h-7 w-12 bg-zinc-900 animate-pulse mt-4" />
+              ) : (
+                <p className="text-xl md:text-2xl font-mono font-bold text-emerald-400 mt-4">{stats.avgUptime}</p>
+              )}
+              <p className="text-[10px] text-zinc-500 mt-0.5">Avg time online</p>
+            </div>
+          </div>
+
+          {/* Epoch Info */}
+          <div className="mt-4 pt-3 border-t border-purple-500/10">
+            <p className="text-xs text-zinc-500">
+              Epoch <span className="text-white font-mono">{stats.epoch}</span>
+              <span className="text-zinc-600 mx-2">•</span>
+              Rewards distributed every ~2 days
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Token Stats */}
+        <div className="bg-[#080808] p-4 md:p-5">
+          <p className="text-[10px] uppercase tracking-wider text-purple-400 mb-3">XAND Token</p>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Price */}
+            <div>
+              {loading ? (
+                <div className="h-7 w-20 bg-zinc-900 animate-pulse" />
+              ) : (
+                <p className="text-xl md:text-2xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
+              )}
+              <p className={`text-xs font-mono mt-0.5 ${stats.priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {stats.priceChange >= 0 ? '↑' : '↓'} {Math.abs(stats.priceChange).toFixed(2)}% 24h
+              </p>
+            </div>
+
+            {/* Market Cap */}
+            <div>
+              {loading ? (
+                <div className="h-7 w-16 bg-zinc-900 animate-pulse" />
+              ) : (
+                <p className="text-xl md:text-2xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
+              )}
+              <p className="text-[10px] text-zinc-500 mt-0.5">Market Cap</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Source - Mobile */}
+      <div className="md:hidden p-3 border-t border-purple-500/10 flex items-center justify-between text-[10px] text-zinc-600">
+        <span>
+          {stats.prpcSource === 'live' && <span className="text-emerald-400">● Live data</span>}
+          {stats.prpcSource !== 'live' && <span>Credits API</span>}
+        </span>
+        <span>Real-time updates</span>
       </div>
     </div>
   );

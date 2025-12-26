@@ -1,123 +1,121 @@
-# Pnode Xanalytics
+# Pnode Xanalytics v0.58.0 — Final Release
 
-**Community analytics platform for Xandeum pNode network**
+**Community analytics platform for Xandeum pNode network stakers**
 
-🌐 **Live Demo:** [pnode-xanalytics.vercel.app](https://pnode-xanalytics.vercel.app)
-
----
-
-## Overview
-
-Pnode Xanalytics helps XAND token holders find the best pNode validators to delegate to. The platform retrieves real-time data from the Xandeum network and presents it in an intuitive, educational interface.
-
-## Features
-
-### ✅ Real-Time pNode Data
-- Live data from **212+ active pNodes** via podcredits.xandeum.network API
-- **Credits ranking** — see which nodes are most active
-- Network-wide statistics: total nodes, total credits, current epoch
-
-### ✅ Market Data
-- Live XAND price from CoinGecko
-- 24h price change
-- Market cap (circulating supply)
-
-### ✅ Educational Content
-- **What is a pNode?** — Simple 3-step explanation
-- **STOINC Distribution** — 94/3/3 pie chart with official formula
-- **XAND Tokenomics** — Total supply, circulating %, how to buy
-- **How to Delegate** — Clear path via Discord/XFDP
-
-### ✅ Tools
-- **Search** — Find any node by address
-- **Comparison Tool** — Select up to 5 nodes side-by-side
-- **Expandable Details** — Click any row for full address + copy function
-- **Load More** — Paginated view starting with top 10
+Live Demo: https://pnode-xanalytics.vercel.app
 
 ---
 
-## Data Sources
+## 🎯 Purpose
 
-| Data | Source | Live |
-|------|--------|------|
-| pNode list & credits | `podcredits.xandeum.network/api/pods-credits` | ✅ |
-| XAND price & market cap | CoinGecko API | ✅ |
-| Epoch info | Xandeum DevNet RPC | ✅ |
-
-All data is fetched in real-time with no mock/simulated values.
+Help XAND token stakers identify optimal pNode pools for delegation by providing real-time performance visibility. Answer the key question: *"Which pNode should I delegate to?"*
 
 ---
 
-## Tech Stack
+## ✨ Features
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** TailwindCSS
+### Live Network Data
+- **212+ Active pNodes** with real-time credits ranking
+- **138+ TB Network Storage** from pRPC integration
+- **XAND Price & Market Cap** via CoinGecko
+- **Current Epoch** from Xandeum DevNet
+
+### pRPC Integration (Unique!)
+- Node version & software info
+- Actual uptime duration
+- Storage committed per node
+- Storage utilization (used vs committed)
+- Last seen timestamp
+- Public/Private node status
+
+### Network Health Metrics
+- Average network uptime
+- Total storage utilization percentage
+- Version distribution (nodes on latest)
+- Public vs private node count
+
+### Per-Node Analytics
+- Credits ranking (activity score)
+- Reward share calculation
+- Storage contribution
+- Utilization rate
+- Reliability indicators
+
+### Educational Content
+- What is a pNode?
+- What is STOINC?
+- XAND tokenomics
+- Staking guide links
+
+### UX Features
+- Mobile responsive design
+- Search by address
+- Compare up to 5 nodes
+- Expandable detail view
+- Stake calculator
+- Copy address button
+- Explorer links
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework:** Next.js 14 + TypeScript
+- **Styling:** TailwindCSS (ORB Markets-inspired dark theme)
 - **Icons:** Lucide React
-- **Deployment:** Vercel
+- **Data Sources:**
+  - `podcredits.xandeum.network` - Credits API
+  - `pRPC (port 6000)` - Node stats via node-fetch
+  - `api.devnet.xandeum.com:8899` - Epoch info
+  - `CoinGecko API` - XAND price
 
 ---
 
-## Local Development
+## 🚀 Quick Start
 
 ```bash
-# Clone the repo
-git clone https://github.com/deFiFello/pnode-xanalytics.git
-cd pnode-xanalytics
-
 # Install dependencies
 npm install
 
-# Run dev server
+# Run development server
 npm run dev
 
-# Open http://localhost:3000
+# Build for production
+npm run build
 ```
 
 ---
 
-## Project Structure
+## 📊 Data Sources
 
-```
-src/
-├── app/
-│   ├── api/pnodes/route.ts   # API proxy for pNode data
-│   ├── page.tsx              # Main page
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Global styles
-├── components/
-│   ├── NetworkOverview.tsx   # Stats header
-│   ├── Leaderboard.tsx       # Node table + education tabs
-│   ├── ComparisonTool.tsx    # Side-by-side comparison
-│   └── Footer.tsx            # Links footer
-```
+| Metric | Source | Update |
+|--------|--------|--------|
+| Credits | podcredits API | Real-time |
+| Version | pRPC | Real-time |
+| Uptime | pRPC | Real-time |
+| Storage | pRPC | Real-time |
+| XAND Price | CoinGecko | Real-time |
+| Epoch | DevNet RPC | Real-time |
 
 ---
 
-## Bounty Criteria Addressed
+## 🔗 Links
 
-| Criteria | Implementation |
-|----------|----------------|
-| **Functionality** | Retrieves real pNode data via API, displays credits and rankings |
-| **Clarity** | Clean UI with explanatory headers, educational tabs |
-| **User Experience** | Search, comparison tool, expandable rows, load more pagination |
-| **Innovation** | STOINC education, tokenomics display, delegation guidance |
-
----
-
-## Links
-
-- **Live Site:** https://pnode-xanalytics.vercel.app
-- **GitHub:** https://github.com/deFiFello/pnode-xanalytics
-- **Xandeum Docs:** https://docs.xandeum.network
-- **Xandeum Discord:** https://discord.gg/xandeum
+- [Xandeum Docs](https://docs.xandeum.network)
+- [pNode Setup](https://pnodes.xandeum.network)
+- [Explorer](https://explorer.xandeum.com)
+- [Discord](https://discord.gg/xandeum)
+- [Stake XAND](https://stakexand.xandeum.network)
 
 ---
 
-## License
+## 📝 Version History
 
-MIT
+- **v0.58** - Final release with pRPC integration, storage utilization, network health metrics
+- **v0.57** - pRPC integration working (version, uptime, storage, public/private)
+- **v0.56** - Mobile responsive design
+- **v0.55** - Final submission with competitor analysis, live indicators
 
 ---
 
-Built for the Xandeum pNode Analytics Bounty • December 2025
+Built for **Xandeum pNode Analytics Bounty** | December 2025
