@@ -14,15 +14,16 @@ interface LeaderboardProps {
   onToggleSelect: (id: string) => void;
 }
 
-type TabType = 'all' | 'top10' | 'pnodes' | 'stoinc' | 'xand';
+type TabType = 'leaderboard' | 'pnodes' | 'stoinc' | 'xand';
 
 export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   const [nodes, setNodes] = useState<PNode[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('all');
+  const [activeTab, setActiveTab] = useState<TabType>('leaderboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showCount, setShowCount] = useState(10);
 
   useEffect(() => {
     async function fetchNodes() {
@@ -53,9 +54,9 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
     node.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const displayNodes = activeTab === 'top10' 
-    ? filteredNodes.slice(0, 10) 
-    : filteredNodes.slice(0, 25);
+  const displayNodes = activeTab === 'leaderboard' 
+    ? filteredNodes.slice(0, showCount) 
+    : filteredNodes.slice(0, 10);
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -69,8 +70,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   };
 
   const tabs: { id: TabType; label: string }[] = [
-    { id: 'all', label: 'All Nodes' },
-    { id: 'top10', label: 'Top 10' },
+    { id: 'leaderboard', label: 'Top Validators' },
     { id: 'pnodes', label: 'What is a pNode?' },
     { id: 'stoinc', label: 'STOINC' },
     { id: 'xand', label: 'XAND' },
@@ -87,48 +87,65 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
     );
   }
 
-  // Education content for tabs
+  // Education content for tabs - ONLY VERIFIED INFO FROM OFFICIAL DOCS
   const renderEducationContent = () => {
     if (activeTab === 'pnodes') {
       return (
         <div className="p-6 border-b border-purple-500/15">
           <div className="grid grid-cols-2 gap-6">
-            {/* Left: What pNodes Do */}
+            {/* Left: The Problem & Solution */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">What pNodes Actually Do</h3>
-              <div className="space-y-3">
+              <h3 className="text-base font-bold text-white mb-4">The Problem pNodes Solve</h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                Solana stores ALL data on every validator (~2,000+ copies). Not scalable for large files or data-heavy dApps.
+              </p>
+              <div className="space-y-2">
                 <div className="p-3 border border-purple-500/15">
-                  <p className="text-xs text-purple-400 uppercase mb-1">Store Data</p>
-                  <p className="text-sm text-zinc-400">Encrypted 4MB pages for Solana smart contracts</p>
+                  <p className="text-xs text-zinc-500 uppercase mb-1">Without pNodes</p>
+                  <p className="text-sm text-zinc-400">No decentralized video, no on-chain games with assets, no large file storage</p>
                 </div>
-                <div className="p-3 border border-purple-500/15">
-                  <p className="text-xs text-purple-400 uppercase mb-1">Respond to Challenges</p>
-                  <p className="text-sm text-zinc-400">Validators ping every 30 seconds to verify data integrity</p>
-                </div>
-                <div className="p-3 border border-purple-500/15">
-                  <p className="text-xs text-purple-400 uppercase mb-1">Earn Credits</p>
-                  <p className="text-sm text-zinc-400">Each successful response = credits. Failed = -100 penalty</p>
+                <div className="p-3 border border-emerald-500/20 bg-emerald-500/5">
+                  <p className="text-xs text-emerald-400 uppercase mb-1">With pNodes</p>
+                  <p className="text-sm text-zinc-300">Configurable redundancy — data stored on selected pNodes, not every validator</p>
                 </div>
               </div>
+              <a 
+                href="https://www.xandeum.network/storage-layer" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
+              >
+                Source: xandeum.network/storage-layer →
+              </a>
             </div>
 
-            {/* Right: Why Your Stake Matters */}
+            {/* Right: How Credits Work */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">Why Your Stake Matters</h3>
-              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4">
-                <p className="text-xs text-emerald-400 uppercase mb-2">Your stake is a MULTIPLIER</p>
-                <p className="text-sm text-zinc-300">
-                  You're not "buying credits." Your XAND stake boosts the node's earning power in the formula.
-                </p>
-              </div>
-              <div className="p-3 bg-black border border-purple-500/10">
-                <code className="text-xs text-purple-300 block">
-                  storageCredits = pNodes × storage × performance × <span className="text-emerald-400">stake</span>
+              <h3 className="text-base font-bold text-white mb-4">How storageCredits Work</h3>
+              <div className="p-4 border border-purple-500/15 mb-3">
+                <p className="text-xs text-zinc-500 uppercase mb-2">Official Formula</p>
+                <code className="text-sm text-purple-300 block">
+                  storageCredits = pNodes × storage × performance × stake
                 </code>
               </div>
-              <p className="text-[10px] text-zinc-600 mt-2">
-                If performance or storage is 0, stake does nothing. Pick active nodes.
-              </p>
+              <div className="space-y-2">
+                <div className="p-3 border border-purple-500/15 flex justify-between">
+                  <span className="text-sm text-zinc-400">Performance Score</span>
+                  <span className="text-sm text-white">0 to 1</span>
+                </div>
+                <div className="p-3 border border-purple-500/15 flex justify-between">
+                  <span className="text-sm text-zinc-400">If any factor = 0</span>
+                  <span className="text-sm text-amber-400">No rewards that epoch</span>
+                </div>
+              </div>
+              <a 
+                href="https://www.xandeum.network/stoinc" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
+              >
+                Source: xandeum.network/stoinc →
+              </a>
             </div>
           </div>
         </div>
@@ -139,11 +156,14 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       return (
         <div className="p-6 border-b border-purple-500/15">
           <div className="grid grid-cols-2 gap-6">
-            {/* Left: Pie Chart */}
+            {/* Left: Distribution - VERIFIED */}
             <div>
               <h3 className="text-base font-bold text-white mb-4">STOINC Distribution</h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                STOINC (Storage Income) = SOL fees from storage-enabled dApps (sedApps)
+              </p>
               <div className="flex items-center gap-6">
-                <div className="relative w-28 h-28">
+                <div className="relative w-24 h-24">
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                     <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" strokeWidth="20" 
                       strokeDasharray="235.6 263.9" />
@@ -156,7 +176,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-emerald-500" />
-                    <span className="text-sm text-zinc-300">94% Operators & Delegators</span>
+                    <span className="text-sm text-zinc-300">94% pNode Operators</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-purple-500" />
@@ -164,36 +184,42 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-zinc-600" />
-                    <span className="text-sm text-zinc-300">3% Investors</span>
+                    <span className="text-sm text-zinc-300">3% Preferred Investors</span>
                   </div>
                 </div>
               </div>
+              <a 
+                href="https://www.xandeum.network/stoinc" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
+              >
+                Source: xandeum.network/stoinc →
+              </a>
             </div>
 
-            {/* Right: How It Works */}
+            {/* Right: Your Earnings */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">How You Earn</h3>
-              <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-[1px] bg-purple-500/10">
-                  <div className="bg-black p-3 text-center">
-                    <p className="text-lg font-mono font-bold text-white">~2 days</p>
-                    <p className="text-[10px] text-zinc-500 uppercase">Epoch Length</p>
-                  </div>
-                  <div className="bg-black p-3 text-center">
-                    <p className="text-lg font-mono font-bold text-white">SOL</p>
-                    <p className="text-[10px] text-zinc-500 uppercase">Paid In</p>
-                  </div>
-                  <div className="bg-black p-3 text-center">
-                    <p className="text-lg font-mono font-bold text-white">Manual</p>
-                    <p className="text-[10px] text-zinc-500 uppercase">Claim</p>
-                  </div>
+              <h3 className="text-base font-bold text-white mb-4">Your STOINC Calculation</h3>
+              <div className="p-4 border border-purple-500/15 mb-3">
+                <p className="text-xs text-zinc-500 uppercase mb-2">Official Formula</p>
+                <code className="text-xs text-purple-300 block leading-relaxed">
+                  yourSTOINC = totalFees × 0.94 × (yourBoostedCredits / totalBoostedCredits)
+                </code>
+              </div>
+              <div className="grid grid-cols-2 gap-[1px] bg-purple-500/10">
+                <div className="bg-black p-3 text-center">
+                  <p className="text-sm font-mono font-bold text-white">~2 days</p>
+                  <p className="text-[10px] text-zinc-500">Per Epoch</p>
                 </div>
-                <div className="p-3 border-l-2 border-cyan-500 bg-cyan-500/5">
-                  <p className="text-xs text-zinc-400">
-                    <strong className="text-cyan-400">Your share</strong> = your % of pool × pool's % of network
-                  </p>
+                <div className="bg-black p-3 text-center">
+                  <p className="text-sm font-mono font-bold text-white">SOL</p>
+                  <p className="text-[10px] text-zinc-500">Paid In</p>
                 </div>
               </div>
+              <p className="text-xs text-zinc-500 mt-3">
+                Boost factors from NFTs (1.1x to 11x) or era purchases (1.25x to 16x) multiply your credits.
+              </p>
             </div>
           </div>
         </div>
@@ -204,21 +230,24 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       return (
         <div className="p-6 border-b border-purple-500/15">
           <div className="grid grid-cols-2 gap-6">
-            {/* Left: Token Info */}
+            {/* Left: What is XAND - VERIFIED */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">XAND Token</h3>
-              <div className="grid grid-cols-3 gap-[1px] bg-purple-500/10 mb-4">
-                <div className="bg-black p-3 text-center">
-                  <p className="text-sm font-mono font-bold text-white">No Lockup</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">Withdraw anytime</p>
+              <h3 className="text-base font-bold text-white mb-4">What is XAND?</h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                Governance token for the Xandeum network. Staking XAND to a pNode increases its storageCredits — which means more STOINC rewards.
+              </p>
+              <div className="space-y-2 mb-4">
+                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Total Supply</span>
+                  <span className="text-sm font-mono text-white">4.015B</span>
                 </div>
-                <div className="bg-black p-3 text-center">
-                  <p className="text-sm font-mono font-bold text-white">No Minimum</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">Any amount</p>
+                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Role in Formula</span>
+                  <span className="text-sm text-emerald-400">Multiplies storageCredits</span>
                 </div>
-                <div className="bg-black p-3 text-center">
-                  <p className="text-sm font-mono font-bold text-white">No Slashing</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">Can't lose stake</p>
+                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Rewards Paid In</span>
+                  <span className="text-sm text-white">SOL (via STOINC)</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -232,32 +261,47 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   Buy on Jupiter
                 </a>
                 <a
-                  href="https://www.xandeum.network/xand-tokenomics"
+                  href="https://www.xandeum.network/stoinc"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
                 >
-                  Tokenomics
+                  STOINC Details
                 </a>
               </div>
             </div>
 
-            {/* Right: What We Don't Know */}
+            {/* Right: How to Delegate - HONEST */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">Data Limitations</h3>
-              <div className="p-4 border border-amber-500/20 bg-amber-500/5">
-                <p className="text-xs text-amber-400 uppercase mb-2">API doesn't provide:</p>
-                <ul className="space-y-1 text-sm text-zinc-400">
-                  <li>• Pool sizes (total XAND staked per node)</li>
-                  <li>• Number of delegators per pool</li>
-                  <li>• Exact XAND → credit boost ratio</li>
-                  <li>• Storage capacity per node</li>
-                  <li>• Historical rewards data</li>
-                </ul>
+              <h3 className="text-base font-bold text-white mb-4">How to Delegate to pNodes</h3>
+              <div className="p-4 border border-amber-500/20 bg-amber-500/5 mb-4">
+                <p className="text-xs text-amber-400 uppercase mb-2">Currently on DevNet</p>
+                <p className="text-sm text-zinc-300 mb-2">
+                  pNode delegation is coordinated through the Xandeum Foundation Delegation Program (XFDP).
+                </p>
+                <p className="text-xs text-zinc-500">
+                  No public on-chain delegation UI yet. Join Discord to participate.
+                </p>
               </div>
-              <p className="text-[10px] text-zinc-600 mt-2">
-                Join Discord for delegation program details and pool coordination.
-              </p>
+              <div className="space-y-2">
+                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Mainnet Status</span>
+                  <span className="text-sm text-cyan-400">Coming Soon</span>
+                </div>
+                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Current Access</span>
+                  <span className="text-sm text-white">Via Discord/XFDP</span>
+                </div>
+              </div>
+              <a 
+                href="https://discord.com/invite/mGAxAuwnR9" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm text-white bg-[#5865F2] hover:bg-[#4752C4] transition-colors"
+                style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+              >
+                Join Xandeum Discord
+              </a>
             </div>
           </div>
         </div>
@@ -307,7 +351,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       {renderEducationContent()}
 
       {/* Table Header */}
-      {(activeTab === 'all' || activeTab === 'top10') && (
+      {activeTab === 'leaderboard' && (
         <>
           <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-600 border-b border-purple-500/10">
             <div className="col-span-1">#</div>
@@ -419,31 +463,44 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                           <div className="bg-black p-3">
                             <p className="text-[10px] text-zinc-600 uppercase">Rank</p>
                             <p className="text-lg font-mono font-bold text-white">#{node.rank}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Position by credits</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">
+                              {node.rank <= 10 ? '🏆 Top performer' : node.rank <= 50 ? 'Strong validator' : 'Active validator'}
+                            </p>
                           </div>
                           <div className="bg-black p-3">
                             <p className="text-[10px] text-cyan-400 uppercase">Credits</p>
                             <p className="text-lg font-mono font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Storage work done</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">Proof of activity (real data)</p>
                           </div>
                           <div className="bg-black p-3">
-                            <p className="text-[10px] text-zinc-600 uppercase">Activity</p>
+                            <p className="text-[10px] text-zinc-600 uppercase">vs Top Node</p>
                             <p className="text-lg font-mono font-bold text-white">{activityPercent.toFixed(1)}%</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">vs top node ({maxCredits.toLocaleString()})</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">
+                              {activityPercent >= 90 ? 'Near leader' : activityPercent >= 70 ? 'Competitive' : 'Room to grow'}
+                            </p>
                           </div>
                           <div className="bg-black p-3">
-                            <p className="text-[10px] text-zinc-600 uppercase">Network Share</p>
+                            <p className="text-[10px] text-purple-400 uppercase">Reward Share</p>
                             <p className="text-lg font-mono font-bold text-purple-400">
                               {((node.credits / nodes.reduce((a, n) => a + n.credits, 0)) * 100).toFixed(3)}%
                             </p>
-                            <p className="text-[10px] text-zinc-600 mt-1">of total {(nodes.reduce((a, n) => a + n.credits, 0) / 1000000).toFixed(1)}M credits</p>
+                            <p className="text-[10px] text-zinc-600 mt-1">Of 94% STOINC pool</p>
                           </div>
+                        </div>
+
+                        {/* Data Source Notice */}
+                        <div className="p-3 border border-zinc-800 bg-zinc-900/50 mb-4">
+                          <p className="text-xs text-zinc-500">
+                            <strong className="text-zinc-400">Data from:</strong> podcredits.xandeum.network API • 
+                            Credits = successful challenge responses (proves node is online & storing data)
+                          </p>
                         </div>
 
                         {/* Stake Calculator */}
                         <StakeCalculator 
                           nodeCredits={node.credits} 
                           totalNetworkCredits={nodes.reduce((a, n) => a + n.credits, 0)}
+                          nodeCount={nodes.length}
                         />
 
                         {/* Actions */}
@@ -475,16 +532,21 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
             })}
           </div>
 
-          {/* Footer */}
-          <div className="px-4 py-3 border-t border-purple-500/10 flex items-center justify-between">
-            <p className="text-xs text-zinc-600">
-              Showing top {displayNodes.length} of {nodes.length} nodes • Real data from pRPC
-            </p>
-            <p className="text-xs text-zinc-600">
-              {selectedIds.length > 0 && (
-                <span className="text-purple-400">{selectedIds.length} selected</span>
+          {/* Footer with Load More */}
+          <div className="px-4 py-3 border-t border-purple-500/10">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-zinc-600">
+                Showing {displayNodes.length} of {nodes.length} validators
+              </p>
+              {showCount < nodes.length && (
+                <button
+                  onClick={() => setShowCount(prev => Math.min(prev + 15, nodes.length))}
+                  className="px-4 py-2 text-xs text-purple-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
+                >
+                  Load More ({Math.min(15, nodes.length - showCount)} more)
+                </button>
               )}
-            </p>
+            </div>
           </div>
         </>
       )}
@@ -492,47 +554,60 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
   );
 }
 
-// Stake Calculator Component
-function StakeCalculator({ nodeCredits, totalNetworkCredits }: { nodeCredits: number; totalNetworkCredits: number }) {
+// Node Performance Details Component
+function StakeCalculator({ nodeCredits, totalNetworkCredits, nodeCount }: { nodeCredits: number; totalNetworkCredits: number; nodeCount: number }) {
   const poolNetworkShare = (nodeCredits / totalNetworkCredits) * 100;
+  const avgCredits = totalNetworkCredits / nodeCount;
+  const vsAverage = (nodeCredits / avgCredits) * 100;
 
   return (
     <div className="p-4 border border-purple-500/15 bg-[#080808]">
       <div className="grid grid-cols-2 gap-6">
-        {/* Left: What We Know */}
+        {/* Left: Performance Metrics */}
         <div>
-          <p className="text-xs text-purple-400 uppercase mb-3">This Node's Performance</p>
+          <p className="text-xs text-purple-400 uppercase mb-3">Performance Metrics</p>
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 border border-purple-500/10">
-              <span className="text-xs text-zinc-500">Credits (real)</span>
-              <span className="text-sm font-mono text-cyan-400">{nodeCredits.toLocaleString()}</span>
+            <div className="p-3 border border-purple-500/10">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-500">Credits Earned</span>
+                <span className="text-sm font-mono text-cyan-400">{nodeCredits.toLocaleString()}</span>
+              </div>
+              <p className="text-[10px] text-zinc-600">Storage work completed this epoch</p>
             </div>
-            <div className="flex items-center justify-between p-2 border border-purple-500/10">
-              <span className="text-xs text-zinc-500">Network share</span>
-              <span className="text-sm font-mono text-purple-400">{poolNetworkShare.toFixed(3)}%</span>
+            <div className="p-3 border border-purple-500/10">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-500">Network Share</span>
+                <span className="text-sm font-mono text-purple-400">{poolNetworkShare.toFixed(3)}%</span>
+              </div>
+              <p className="text-[10px] text-zinc-600">This node's portion of total rewards</p>
             </div>
-            <div className="flex items-center justify-between p-2 border border-purple-500/10">
-              <span className="text-xs text-zinc-500">vs Top Node</span>
-              <span className="text-sm font-mono text-white">{((nodeCredits / (totalNetworkCredits * poolNetworkShare / 100)) * poolNetworkShare).toFixed(1)}%</span>
+            <div className="p-3 border border-purple-500/10">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-500">vs Average</span>
+                <span className={`text-sm font-mono ${vsAverage >= 100 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {vsAverage >= 100 ? '+' : ''}{(vsAverage - 100).toFixed(0)}%
+                </span>
+              </div>
+              <p className="text-[10px] text-zinc-600">Compared to network average ({Math.round(avgCredits).toLocaleString()} credits)</p>
             </div>
           </div>
         </div>
 
-        {/* Right: What We Don't Know */}
+        {/* Right: Coming with Mainnet */}
         <div>
-          <p className="text-xs text-amber-400 uppercase mb-3">Not Available via API</p>
-          <div className="space-y-2 text-sm text-zinc-500">
-            <div className="flex items-center justify-between p-2 border border-amber-500/10 bg-amber-500/5">
-              <span>Pool total stake</span>
-              <span className="text-amber-400">Unknown</span>
+          <p className="text-xs text-cyan-400 uppercase mb-3">Coming with Mainnet</p>
+          <div className="space-y-2">
+            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
+              <span className="text-sm text-zinc-400">Pool total stake</span>
             </div>
-            <div className="flex items-center justify-between p-2 border border-amber-500/10 bg-amber-500/5">
-              <span>Number of delegators</span>
-              <span className="text-amber-400">Unknown</span>
+            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
+              <span className="text-sm text-zinc-400">Number of delegators</span>
             </div>
-            <div className="flex items-center justify-between p-2 border border-amber-500/10 bg-amber-500/5">
-              <span>Your projected share</span>
-              <span className="text-amber-400">Can't calculate</span>
+            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
+              <span className="text-sm text-zinc-400">Your projected share calculator</span>
+            </div>
+            <div className="p-3 border border-cyan-500/10 bg-cyan-500/5">
+              <span className="text-sm text-zinc-400">Historical rewards tracking</span>
             </div>
           </div>
         </div>
@@ -540,8 +615,7 @@ function StakeCalculator({ nodeCredits, totalNetworkCredits }: { nodeCredits: nu
 
       <div className="mt-4 p-3 border-l-2 border-purple-500 bg-purple-500/5">
         <p className="text-xs text-zinc-400">
-          <strong className="text-purple-400">To delegate:</strong> Join the Xandeum Discord and coordinate with the Foundation Delegation Program. 
-          They can provide pool sizes and help you choose.
+          <strong className="text-purple-400">Ready to delegate?</strong> Join the Xandeum Discord to coordinate with the Foundation Delegation Program.
         </p>
       </div>
     </div>

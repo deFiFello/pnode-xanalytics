@@ -67,7 +67,7 @@ export function NetworkOverview() {
             Pnode Xanalytics
           </h1>
           <p className="text-sm text-zinc-500">
-            Real-time pNode network data from pRPC
+            Find the best pNode validators for your XAND delegation
           </p>
         </div>
         <div className="flex gap-2">
