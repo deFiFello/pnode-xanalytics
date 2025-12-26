@@ -93,58 +93,48 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       return (
         <div className="p-6 border-b border-purple-500/15">
           <div className="grid grid-cols-2 gap-6">
-            {/* Left: The Problem & Solution */}
+            {/* Left: Simple explanation */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">The Problem pNodes Solve</h3>
+              <h3 className="text-base font-bold text-white mb-4">What is a pNode?</h3>
               <p className="text-sm text-zinc-400 mb-4">
-                Solana stores ALL data on every validator (~2,000+ copies). Not scalable for large files or data-heavy dApps.
+                A storage server that earns SOL by hosting data for Solana apps.
               </p>
-              <div className="space-y-2">
-                <div className="p-3 border border-purple-500/15">
-                  <p className="text-xs text-zinc-500 uppercase mb-1">Without pNodes</p>
-                  <p className="text-sm text-zinc-400">No decentralized video, no on-chain games with assets, no large file storage</p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">1</span>
+                  <span className="text-sm text-zinc-300">Stores encrypted data for dApps</span>
                 </div>
-                <div className="p-3 border border-emerald-500/20 bg-emerald-500/5">
-                  <p className="text-xs text-emerald-400 uppercase mb-1">With pNodes</p>
-                  <p className="text-sm text-zinc-300">Configurable redundancy — data stored on selected pNodes, not every validator</p>
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">2</span>
+                  <span className="text-sm text-zinc-300">Proves it still has the data (earns credits)</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">3</span>
+                  <span className="text-sm text-zinc-300">Gets paid SOL based on credits earned</span>
                 </div>
               </div>
-              <a 
-                href="https://www.xandeum.network/storage-layer" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
-              >
-                Source: xandeum.network/storage-layer →
-              </a>
             </div>
 
-            {/* Right: How Credits Work */}
+            {/* Right: Why stake */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">How storageCredits Work</h3>
-              <div className="p-4 border border-purple-500/15 mb-3">
-                <p className="text-xs text-zinc-500 uppercase mb-2">Official Formula</p>
-                <code className="text-sm text-purple-300 block">
-                  storageCredits = pNodes × storage × performance × stake
+              <h3 className="text-base font-bold text-white mb-4">Why Delegate XAND?</h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                Your XAND stake boosts the node's earning power. You share in their SOL rewards.
+              </p>
+              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5">
+                <p className="text-xs text-emerald-400 uppercase mb-2">The Formula</p>
+                <code className="text-sm text-white block mb-2">
+                  earnings = nodes × storage × performance × <span className="text-emerald-400">stake</span>
                 </code>
-              </div>
-              <div className="space-y-2">
-                <div className="p-3 border border-purple-500/15 flex justify-between">
-                  <span className="text-sm text-zinc-400">Performance Score</span>
-                  <span className="text-sm text-white">0 to 1</span>
-                </div>
-                <div className="p-3 border border-purple-500/15 flex justify-between">
-                  <span className="text-sm text-zinc-400">If any factor = 0</span>
-                  <span className="text-sm text-amber-400">No rewards that epoch</span>
-                </div>
+                <p className="text-xs text-zinc-500">Higher stake = higher earnings for everyone in the pool</p>
               </div>
               <a 
                 href="https://www.xandeum.network/stoinc" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
+                className="inline-block mt-4 text-xs text-purple-400 hover:text-purple-300"
               >
-                Source: xandeum.network/stoinc →
+                Learn more at xandeum.network/stoinc →
               </a>
             </div>
           </div>
@@ -155,14 +145,15 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
     if (activeTab === 'stoinc') {
       return (
         <div className="p-6 border-b border-purple-500/15">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left: Distribution - VERIFIED */}
+          <div className="grid grid-cols-2 gap-8">
+            {/* Left: Distribution */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">STOINC Distribution</h3>
-              <p className="text-sm text-zinc-400 mb-4">
-                STOINC (Storage Income) = SOL fees from storage-enabled dApps (sedApps)
+              <h3 className="text-base font-bold text-white mb-4">STOINC = Storage Income</h3>
+              <p className="text-sm text-zinc-400 mb-6">
+                SOL fees from storage-enabled dApps, distributed every ~2 days.
               </p>
-              <div className="flex items-center gap-6">
+              
+              <div className="flex items-center gap-6 mb-4">
                 <div className="relative w-24 h-24">
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                     <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" strokeWidth="20" 
@@ -176,7 +167,7 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-emerald-500" />
-                    <span className="text-sm text-zinc-300">94% pNode Operators</span>
+                    <span className="text-sm text-zinc-300">94% pNode Operators + Delegators</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-purple-500" />
@@ -184,42 +175,42 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-zinc-600" />
-                    <span className="text-sm text-zinc-300">3% Preferred Investors</span>
+                    <span className="text-sm text-zinc-300">3% Investors</span>
                   </div>
                 </div>
               </div>
+              
               <a 
                 href="https://www.xandeum.network/stoinc" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-block mt-3 text-xs text-purple-400 hover:text-purple-300"
+                className="inline-block text-xs text-purple-400 hover:text-purple-300"
               >
                 Source: xandeum.network/stoinc →
               </a>
             </div>
 
-            {/* Right: Your Earnings */}
+            {/* Right: How to Earn */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">Your STOINC Calculation</h3>
-              <div className="p-4 border border-purple-500/15 mb-3">
-                <p className="text-xs text-zinc-500 uppercase mb-2">Official Formula</p>
-                <code className="text-xs text-purple-300 block leading-relaxed">
-                  yourSTOINC = totalFees × 0.94 × (yourBoostedCredits / totalBoostedCredits)
-                </code>
-              </div>
-              <div className="grid grid-cols-2 gap-[1px] bg-purple-500/10">
-                <div className="bg-black p-3 text-center">
-                  <p className="text-sm font-mono font-bold text-white">~2 days</p>
-                  <p className="text-[10px] text-zinc-500">Per Epoch</p>
+              <h3 className="text-base font-bold text-white mb-4">How Rewards Work</h3>
+              
+              <div className="space-y-3 mb-6">
+                <div className="p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Epoch Length</p>
+                  <p className="text-lg font-mono font-bold text-white">~2 days</p>
                 </div>
-                <div className="bg-black p-3 text-center">
-                  <p className="text-sm font-mono font-bold text-white">SOL</p>
-                  <p className="text-[10px] text-zinc-500">Paid In</p>
+                <div className="p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Paid In</p>
+                  <p className="text-lg font-mono font-bold text-emerald-400">SOL</p>
                 </div>
               </div>
-              <p className="text-xs text-zinc-500 mt-3">
-                Boost factors from NFTs (1.1x to 11x) or era purchases (1.25x to 16x) multiply your credits.
-              </p>
+
+              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5">
+                <p className="text-xs text-emerald-400 uppercase mb-2">Your Share</p>
+                <p className="text-sm text-zinc-300">
+                  (your stake ÷ pool stake) × (pool credits ÷ network credits) × 94%
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -229,28 +220,34 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
     if (activeTab === 'xand') {
       return (
         <div className="p-6 border-b border-purple-500/15">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left: What is XAND - VERIFIED */}
+          <div className="grid grid-cols-2 gap-8">
+            {/* Left: Token Info */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">What is XAND?</h3>
-              <p className="text-sm text-zinc-400 mb-4">
-                Governance token for the Xandeum network. Staking XAND to a pNode increases its storageCredits — which means more STOINC rewards.
+              <h3 className="text-base font-bold text-white mb-4">XAND Token</h3>
+              <p className="text-sm text-zinc-400 mb-6">
+                Governance token for Xandeum. Stake to pNodes to boost their earnings and share SOL rewards.
               </p>
-              <div className="space-y-2 mb-4">
-                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Total Supply</span>
-                  <span className="text-sm font-mono text-white">4.015B</span>
+              
+              {/* Supply Stats */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Total Supply</p>
+                  <p className="text-lg font-mono font-bold text-white">4.015B</p>
                 </div>
-                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Role in Formula</span>
-                  <span className="text-sm text-emerald-400">Multiplies storageCredits</span>
-                </div>
-                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Rewards Paid In</span>
-                  <span className="text-sm text-white">SOL (via STOINC)</span>
+                <div className="p-4 border border-purple-500/15">
+                  <p className="text-[10px] text-zinc-500 uppercase mb-1">Circulating</p>
+                  <p className="text-lg font-mono font-bold text-emerald-400">1.3B</p>
+                  <p className="text-[10px] text-zinc-600">~32%</p>
                 </div>
               </div>
-              <div className="flex gap-2">
+
+              {/* Role */}
+              <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4">
+                <p className="text-xs text-emerald-400 uppercase mb-1">Your stake multiplies node earnings</p>
+                <p className="text-sm text-zinc-300">Rewards paid in SOL every ~2 days</p>
+              </div>
+
+              <div className="flex gap-3">
                 <a
                   href="https://jup.ag/swap/SOL-XAND"
                   target="_blank"
@@ -261,46 +258,50 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
                   Buy on Jupiter
                 </a>
                 <a
-                  href="https://www.xandeum.network/stoinc"
+                  href="https://www.xandeum.network/xand-tokenomics"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 text-sm text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
                 >
-                  STOINC Details
+                  Tokenomics
                 </a>
               </div>
             </div>
 
-            {/* Right: How to Delegate - HONEST */}
+            {/* Right: How to Delegate */}
             <div>
-              <h3 className="text-base font-bold text-white mb-4">How to Delegate to pNodes</h3>
-              <div className="p-4 border border-amber-500/20 bg-amber-500/5 mb-4">
-                <p className="text-xs text-amber-400 uppercase mb-2">Currently on DevNet</p>
-                <p className="text-sm text-zinc-300 mb-2">
-                  pNode delegation is coordinated through the Xandeum Foundation Delegation Program (XFDP).
-                </p>
-                <p className="text-xs text-zinc-500">
-                  No public on-chain delegation UI yet. Join Discord to participate.
+              <h3 className="text-base font-bold text-white mb-4">How to Delegate</h3>
+              
+              <div className="p-4 border border-cyan-500/20 bg-cyan-500/5 mb-6">
+                <p className="text-xs text-cyan-400 uppercase mb-2">Currently on DevNet</p>
+                <p className="text-sm text-zinc-300">
+                  Delegation is coordinated through Discord and the Xandeum Foundation Delegation Program (XFDP).
                 </p>
               </div>
-              <div className="space-y-2">
-                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Mainnet Status</span>
-                  <span className="text-sm text-cyan-400">Coming Soon</span>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">1</span>
+                  <span className="text-sm text-zinc-300">Buy XAND on Jupiter</span>
                 </div>
-                <div className="p-3 border border-purple-500/15 flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Current Access</span>
-                  <span className="text-sm text-white">Via Discord/XFDP</span>
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">2</span>
+                  <span className="text-sm text-zinc-300">Join Xandeum Discord</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 border border-purple-500/15">
+                  <span className="text-purple-400 font-mono">3</span>
+                  <span className="text-sm text-zinc-300">Coordinate delegation with XFDP team</span>
                 </div>
               </div>
+
               <a 
                 href="https://discord.com/invite/mGAxAuwnR9" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm text-white bg-[#5865F2] hover:bg-[#4752C4] transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm text-white bg-[#5865F2] hover:bg-[#4752C4] transition-colors"
                 style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
               >
-                Join Xandeum Discord
+                Join Discord
               </a>
             </div>
           </div>

@@ -67,7 +67,7 @@ export function NetworkOverview() {
             Pnode Xanalytics
           </h1>
           <p className="text-sm text-zinc-500">
-            Find the best pNode validators for your XAND delegation
+            Earn Solana for strengthening Xandeum's Storage Network
           </p>
         </div>
         <div className="flex gap-2">
