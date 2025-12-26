@@ -1,98 +1,118 @@
-# Pnode Xanalytics v0.36
+# Pnode Xanalytics
 
-Community analytics platform for the Xandeum pNode network. Helps stakers make informed delegation decisions within 60 seconds.
+**Community analytics platform for Xandeum pNode network**
 
-![Version](https://img.shields.io/badge/version-0.36-violet)
-![Network](https://img.shields.io/badge/network-DevNet-emerald)
+🌐 **Live Demo:** [pnode-xanalytics.vercel.app](https://pnode-xanalytics.vercel.app)
+
+---
+
+## Overview
+
+Pnode Xanalytics helps XAND token holders find the best pNode validators to delegate to. The platform retrieves real-time data from the Xandeum network and presents it in an intuitive, educational interface.
 
 ## Features
 
-### Quick Guide - Educational Content
-- **How It Works**: Explains STOINC (Storage Income), reward flow, and why there's no fixed APY
-- **Key Metrics**: Score, Uptime, Fee, Credits, Total Stake, Delegators - with guidance on what to look for
-- **Pick Strategy**: Three approaches - Safe & Steady, Maximize Returns, Support Small Operators
+### ✅ Real-Time pNode Data
+- Live data from **212+ active pNodes** via podcredits.xandeum.network API
+- **Credits ranking** — see which nodes are most active
+- Network-wide statistics: total nodes, total credits, current epoch
 
-### pNode Leaderboard
-- Real-time data from Xandeum's podcredits API
-- Sortable by Score, Uptime, Fee
-- Top 3 highlighted with badges (Most Active, Best Uptime, Lowest Fee)
-- Globe icons for clean node identity display
+### ✅ Market Data
+- Live XAND price from CoinGecko
+- 24h price change
+- Market cap (circulating supply)
 
-### Expanded Node Details
-- Status: Online indicator, version, credits with activity hints
-- Delegation: Fee, total stake, delegators with pool size insights
-- Identity: Copy-to-clipboard key, location, explorer link
-- 30-Day Performance: Mini sparkline chart
+### ✅ Educational Content
+- **What is a pNode?** — Simple 3-step explanation
+- **STOINC Distribution** — 94/3/3 pie chart with official formula
+- **XAND Tokenomics** — Total supply, circulating %, how to buy
+- **How to Delegate** — Clear path via Discord/XFDP
 
-### Smart Calculator
-- Uses **actual node data** (total stake, delegators, fee, credits)
-- Input your stake amount to see:
-  - Your % of the pool
-  - Your share after operator fee
-  - Estimated daily/monthly STOINC earnings
-- Visual progress bars for clear understanding
+### ✅ Tools
+- **Search** — Find any node by address
+- **Comparison Tool** — Select up to 5 nodes side-by-side
+- **Expandable Details** — Click any row for full address + copy function
+- **Load More** — Paginated view starting with top 10
 
-## Tech Stack
-
-- **Framework**: Next.js 14 + TypeScript
-- **Styling**: TailwindCSS
-- **Icons**: Lucide React
-- **Data Sources**:
-  - `podcredits.xandeum.network` - pNode credits
-  - `api.devnet.xandeum.com:8899` - Epoch info
-  - `api.coingecko.com` - XAND price
-
-## Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## Deploy to Vercel
-
-```bash
-# If you have Vercel CLI
-vercel
-
-# Or push to GitHub and connect to Vercel
-```
-
-## Changelog
-
-### v0.36 (Current)
-- 🔧 Fixed CORS - added API proxy route for podcredits
-- 🎨 Refined color palette - purple as accent, not dominant
-- 🌍 Globe icons replace "P" circles for node identity
-- 📚 Comprehensive Quick Guide with tabs (How It Works, Key Metrics, Pick Strategy)
-- 💡 Filled dead space in expanded rows with contextual hints
-- 🧮 Smart Calculator uses actual node data for accurate estimates
-- 📊 Visual breakdowns showing pool share and fee impact
-
-### v0.35
-- Initial redesign attempt
-
-### v0.34
-- Awards integrated into leaderboard
-- Credits shown for all nodes
-- Honest fee calculator (no fake APY)
+---
 
 ## Data Sources
 
-| Source | Endpoint | Data |
-|--------|----------|------|
-| pNode Credits | `podcredits.xandeum.network/api/podcredits` | Activity credits per node |
-| Epoch Info | `api.devnet.xandeum.com:8899` | Current epoch |
-| XAND Price | `api.coingecko.com/api/v3/simple/price` | USD price, 24h change |
+| Data | Source | Live |
+|------|--------|------|
+| pNode list & credits | `podcredits.xandeum.network/api/pods-credits` | ✅ |
+| XAND price & market cap | CoinGecko API | ✅ |
+| Epoch info | Xandeum DevNet RPC | ✅ |
+
+All data is fetched in real-time with no mock/simulated values.
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** TailwindCSS
+- **Icons:** Lucide React
+- **Deployment:** Vercel
+
+---
+
+## Local Development
+
+```bash
+# Clone the repo
+git clone https://github.com/deFiFello/pnode-xanalytics.git
+cd pnode-xanalytics
+
+# Install dependencies
+npm install
+
+# Run dev server
+npm run dev
+
+# Open http://localhost:3000
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/pnodes/route.ts   # API proxy for pNode data
+│   ├── page.tsx              # Main page
+│   ├── layout.tsx            # Root layout
+│   └── globals.css           # Global styles
+├── components/
+│   ├── NetworkOverview.tsx   # Stats header
+│   ├── Leaderboard.tsx       # Node table + education tabs
+│   ├── ComparisonTool.tsx    # Side-by-side comparison
+│   └── Footer.tsx            # Links footer
+```
+
+---
+
+## Bounty Criteria Addressed
+
+| Criteria | Implementation |
+|----------|----------------|
+| **Functionality** | Retrieves real pNode data via API, displays credits and rankings |
+| **Clarity** | Clean UI with explanatory headers, educational tabs |
+| **User Experience** | Search, comparison tool, expandable rows, load more pagination |
+| **Innovation** | STOINC education, tokenomics display, delegation guidance |
+
+---
+
+## Links
+
+- **Live Site:** https://pnode-xanalytics.vercel.app
+- **GitHub:** https://github.com/deFiFello/pnode-xanalytics
+- **Xandeum Docs:** https://docs.xandeum.network
+- **Xandeum Discord:** https://discord.gg/xandeum
+
+---
 
 ## License
 
@@ -100,4 +120,4 @@ MIT
 
 ---
 
-Built for the Xandeum Bounty Competition 🏆
+Built for the Xandeum pNode Analytics Bounty • December 2025

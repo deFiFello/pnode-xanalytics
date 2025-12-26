@@ -351,6 +351,21 @@ export function Leaderboard({ selectedIds, onToggleSelect }: LeaderboardProps) {
       {/* Education Content */}
       {renderEducationContent()}
 
+      {/* Leaderboard Header */}
+      {activeTab === 'leaderboard' && (
+        <div className="px-4 py-3 border-b border-purple-500/10 bg-black/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-zinc-300">
+                <span className="text-cyan-400 font-medium">Credits</span> = storage work completed. 
+                <span className="text-zinc-500 ml-1">Higher credits = more active node = larger reward share.</span>
+              </p>
+            </div>
+            <p className="text-[10px] text-zinc-600">Click row to expand • Check to compare</p>
+          </div>
+        </div>
+      )}
+
       {/* Table Header */}
       {activeTab === 'leaderboard' && (
         <>

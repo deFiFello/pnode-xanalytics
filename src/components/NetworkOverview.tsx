@@ -96,13 +96,19 @@ export function NetworkOverview() {
       <div className="grid grid-cols-5 gap-[1px] bg-purple-500/10">
         {/* pNodes */}
         <div className="bg-black p-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">pNodes</p>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-[10px] uppercase tracking-wider text-zinc-600">pNodes</p>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-[8px] text-emerald-400">LIVE</span>
+            </span>
+          </div>
           {loading ? (
             <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
           ) : (
             <p className="text-xl font-mono font-bold text-white">{stats.activeNodes}</p>
           )}
-          <p className="text-[10px] text-purple-400 mt-1">Active</p>
+          <p className="text-[10px] text-purple-400 mt-1">Active on network</p>
         </div>
 
         {/* Credits */}
@@ -113,7 +119,7 @@ export function NetworkOverview() {
           ) : (
             <p className="text-xl font-mono font-bold text-cyan-400">{formatNumber(stats.totalCredits)}</p>
           )}
-          <p className="text-[10px] text-zinc-500 mt-1">Total activity</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Work completed</p>
         </div>
 
         {/* XAND Price */}
@@ -125,7 +131,7 @@ export function NetworkOverview() {
             <p className="text-xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
           )}
           <p className={`text-[10px] mt-1 font-mono ${stats.priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}%
+            {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}% 24h
           </p>
         </div>
 
@@ -137,7 +143,7 @@ export function NetworkOverview() {
           ) : (
             <p className="text-xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
           )}
-          <p className="text-[10px] text-zinc-500 mt-1">FDV</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Circulating</p>
         </div>
 
         {/* Epoch */}
@@ -148,8 +154,14 @@ export function NetworkOverview() {
           ) : (
             <p className="text-xl font-mono font-bold text-white">{stats.epoch}</p>
           )}
-          <p className="text-[10px] text-zinc-500 mt-1">DevNet</p>
+          <p className="text-[10px] text-zinc-500 mt-1">~2 days each</p>
         </div>
+      </div>
+
+      {/* Data Source */}
+      <div className="flex items-center justify-between text-[10px] text-zinc-600 px-1">
+        <span>Data: podcredits.xandeum.network • CoinGecko • DevNet RPC</span>
+        <span>Updated in real-time</span>
       </div>
     </div>
   );
