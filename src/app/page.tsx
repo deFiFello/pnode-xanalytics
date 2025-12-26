@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { NetworkOverview, StakingInfo, Leaderboard, ComparisonTool, Footer } from '@/components';
+import { NetworkOverview, Leaderboard, ComparisonTool, Footer } from '@/components';
 
 export default function Home() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -19,13 +19,10 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950">
+    <main className="min-h-screen bg-black">
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Network Stats */}
         <NetworkOverview />
-
-        {/* Educational Content */}
-        <StakingInfo />
 
         {/* Comparison Tool (shows when nodes selected) */}
         <ComparisonTool
@@ -34,7 +31,7 @@ export default function Home() {
           onClear={() => setSelectedIds([])}
         />
 
-        {/* Main Leaderboard */}
+        {/* Main Leaderboard (includes education tabs) */}
         <Leaderboard
           selectedIds={selectedIds}
           onToggleSelect={handleToggleSelect}

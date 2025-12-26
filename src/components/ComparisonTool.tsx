@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Globe, Trophy, ExternalLink } from 'lucide-react';
+import { X, ExternalLink } from 'lucide-react';
 
 interface PNode {
   id: string;
@@ -26,12 +26,11 @@ export function ComparisonTool({ selectedIds, onRemove, onClear }: ComparisonToo
         const data = await res.json();
         
         if (data.success && data.nodes) {
-          const cleanNodes = data.nodes.map((node: any, index: number) => ({
+          setAllNodes(data.nodes.map((node: any, index: number) => ({
             id: node.id,
             credits: node.credits,
             rank: index + 1,
-          }));
-          setAllNodes(cleanNodes);
+          })));
         }
       } catch (error) {
         console.error('Failed to fetch:', error);
@@ -54,110 +53,110 @@ export function ComparisonTool({ selectedIds, onRemove, onClear }: ComparisonToo
   const bestNode = nodes.reduce((best, node) => 
     node.credits > best.credits ? node : best
   , nodes[0]);
+  const totalCredits = allNodes.reduce((sum, n) => sum + n.credits, 0);
 
   return (
-    <div className="bg-zinc-900/50 border border-violet-500/30 rounded-2xl overflow-hidden">
+    <div className="border border-purple-500/30 bg-[#080808]">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-zinc-800/50 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-purple-500/15 flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-zinc-100">Compare pNodes</h3>
-          <p className="text-sm text-zinc-500">{nodes.length} selected • Based on activity credits</p>
+          <h3 className="text-sm font-bold text-white">Compare pNodes</h3>
+          <p className="text-[10px] text-zinc-600">{nodes.length} selected</p>
         </div>
         <button
           onClick={onClear}
-          className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+          className="text-[10px] text-zinc-500 hover:text-white transition-colors uppercase tracking-wider"
         >
-          Clear all
+          Clear
         </button>
       </div>
 
       {/* Comparison Grid */}
       <div className="p-4">
-        <div className={`grid gap-3 ${
+        <div className={`grid gap-[1px] bg-purple-500/10 ${
           nodes.length === 2 ? 'grid-cols-2' :
           nodes.length === 3 ? 'grid-cols-3' :
-          nodes.length === 4 ? 'grid-cols-2 lg:grid-cols-4' :
-          'grid-cols-2 lg:grid-cols-5'
+          nodes.length === 4 ? 'grid-cols-4' :
+          'grid-cols-5'
         }`}>
           {nodes.map((node) => {
             const isBest = node.id === bestNode?.id && nodes.length > 1;
-            const creditRatio = (node.credits / maxCredits) * 100;
+            const creditPercent = (node.credits / maxCredits) * 100;
+            const networkShare = (node.credits / totalCredits) * 100;
 
             return (
               <div
                 key={node.id}
-                className={`relative bg-zinc-800/30 border rounded-xl p-4 ${
-                  isBest ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-zinc-700/30'
-                }`}
+                className={`bg-black p-4 relative ${isBest ? 'ring-1 ring-amber-500/50' : ''}`}
               >
                 {/* Remove Button */}
                 <button
                   onClick={() => onRemove(node.id)}
-                  className="absolute top-2 right-2 p-1 hover:bg-zinc-700/50 rounded transition-colors"
+                  className="absolute top-2 right-2 p-1 text-zinc-600 hover:text-white transition-colors"
                 >
-                  <X className="h-4 w-4 text-zinc-500" />
+                  <X className="h-3 w-3" />
                 </button>
 
                 {/* Best Badge */}
                 {isBest && (
-                  <div className="absolute -top-2 left-3 flex items-center gap-1 px-2 py-0.5 bg-amber-500 text-black text-xs font-bold rounded">
-                    <Trophy className="h-3 w-3" />
-                    BEST
-                  </div>
+                  <div className="absolute -top-px left-0 right-0 h-[2px] bg-amber-500" />
                 )}
 
-                {/* Node Icon */}
-                <div className="flex items-center gap-2 mb-3 mt-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-zinc-700/50 flex items-center justify-center">
-                    <Globe className="h-4 w-4 text-cyan-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-mono text-xs text-zinc-400 truncate">
-                      {node.id.slice(0, 8)}...{node.id.slice(-4)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stats */}
+                {/* Content */}
                 <div className="space-y-3">
+                  {/* Address */}
+                  <div>
+                    <p className="font-mono text-xs text-zinc-500 truncate">
+                      {node.id.slice(0, 6)}...{node.id.slice(-4)}
+                    </p>
+                    {isBest && (
+                      <span className="text-[10px] text-amber-400 uppercase font-bold">Best</span>
+                    )}
+                  </div>
+
                   {/* Rank */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">Rank</span>
-                    <span className={`font-mono font-bold ${
-                      node.rank <= 3 ? 'text-amber-400' :
-                      node.rank <= 10 ? 'text-zinc-200' : 'text-zinc-400'
+                  <div>
+                    <p className="text-[10px] text-zinc-600 uppercase">Rank</p>
+                    <p className={`text-lg font-mono font-bold ${
+                      node.rank <= 3 ? 'text-amber-400' : 'text-white'
                     }`}>
                       #{node.rank}
-                    </span>
+                    </p>
                   </div>
 
                   {/* Credits */}
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-zinc-500">Credits</span>
-                      <span className="font-mono font-bold text-cyan-400">
-                        {node.credits.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <p className="text-[10px] text-cyan-400 uppercase">Credits</p>
+                    <p className="text-lg font-mono font-bold text-cyan-400">
+                      {node.credits.toLocaleString()}
+                    </p>
+                    <div className="mt-1 w-full h-1 bg-zinc-900">
                       <div
-                        className="h-full bg-cyan-500 rounded-full transition-all"
-                        style={{ width: `${creditRatio}%` }}
+                        className="h-full bg-cyan-500"
+                        style={{ width: `${creditPercent}%` }}
                       />
                     </div>
                   </div>
-                </div>
 
-                {/* Action */}
-                <a
-                  href={`https://explorer.xandeum.com/address/${node.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 flex items-center justify-center gap-1 w-full py-2 bg-zinc-700/30 hover:bg-zinc-700/50 rounded-lg text-xs text-zinc-400 transition-colors"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Explorer
-                </a>
+                  {/* Network Share */}
+                  <div>
+                    <p className="text-[10px] text-zinc-600 uppercase">Share</p>
+                    <p className="text-sm font-mono text-purple-400">
+                      {networkShare.toFixed(3)}%
+                    </p>
+                  </div>
+
+                  {/* Action */}
+                  <a
+                    href={`https://explorer.xandeum.com/address/${node.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1 w-full py-1.5 text-[10px] text-zinc-500 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    View
+                  </a>
+                </div>
               </div>
             );
           })}
@@ -166,13 +165,11 @@ export function ComparisonTool({ selectedIds, onRemove, onClear }: ComparisonToo
 
       {/* Summary */}
       {nodes.length > 1 && (
-        <div className="px-6 py-4 border-t border-zinc-800/50 bg-zinc-800/20">
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-zinc-500">Recommendation:</span>
-            <span className="text-zinc-200">
-              <strong className="text-amber-400">{bestNode?.id.slice(0, 8)}...</strong> has the highest activity credits ({bestNode?.credits.toLocaleString()})
-            </span>
-          </div>
+        <div className="px-4 py-3 border-t border-purple-500/15 bg-purple-500/5">
+          <p className="text-xs text-zinc-400">
+            <span className="text-amber-400 font-mono">{bestNode?.id.slice(0, 8)}...</span>
+            {' '}has highest credits ({bestNode?.credits.toLocaleString()})
+          </p>
         </div>
       )}
     </div>

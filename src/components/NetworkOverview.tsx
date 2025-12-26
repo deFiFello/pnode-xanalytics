@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database, TrendingUp, Coins, Clock, ExternalLink } from 'lucide-react';
 
 interface NetworkStats {
   activeNodes: number;
@@ -34,11 +33,9 @@ export function NetworkOverview() {
         );
         const priceData = await priceRes.json();
 
-        const totalCredits = nodesData.nodes?.reduce((sum: number, n: any) => sum + n.credits, 0) || 0;
-
         setStats({
           activeNodes: nodesData.count || 0,
-          totalCredits,
+          totalCredits: nodesData.totalCredits || 0,
           xandPrice: priceData.xandeum?.usd || 0,
           priceChange: priceData.xandeum?.usd_24h_change || 0,
           marketCap: priceData.xandeum?.usd_market_cap || 0,
@@ -54,133 +51,105 @@ export function NetworkOverview() {
     fetchStats();
   }, []);
 
-  const formatMarketCap = (cap: number) => {
-    if (cap >= 1e9) return `$${(cap / 1e9).toFixed(2)}B`;
-    if (cap >= 1e6) return `$${(cap / 1e6).toFixed(2)}M`;
-    return `$${cap.toLocaleString()}`;
+  const formatNumber = (num: number) => {
+    if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
+    if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
+    if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
+    return num.toLocaleString();
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-3">
-        <h1 className="text-3xl font-bold text-zinc-100">
-          Pnode Xanalytics
-        </h1>
-        <p className="text-zinc-400 max-w-2xl mx-auto">
-          Explore the Xandeum pNode network — decentralized storage for Solana programs
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Pnode Xanalytics
+          </h1>
+          <p className="text-sm text-zinc-500">
+            Real-time pNode network data from pRPC
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <a
+            href="https://docs.xandeum.network"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 text-xs text-zinc-400 border border-purple-500/20 hover:border-purple-500/40 hover:text-white transition-colors"
+            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+          >
+            Docs
+          </a>
+          <a
+            href="https://discord.gg/xandeum"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
+            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+          >
+            Discord
+          </a>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {/* Active pNodes */}
-        <div className="bg-zinc-900/50 border border-violet-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Database className="h-4 w-4 text-violet-400" />
-            <p className="text-xs text-violet-400 uppercase tracking-wide">pNodes</p>
-          </div>
+      {/* Stats Grid - Bento style */}
+      <div className="grid grid-cols-5 gap-[1px] bg-purple-500/10">
+        {/* pNodes */}
+        <div className="bg-black p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">pNodes</p>
           {loading ? (
-            <div className="h-7 bg-zinc-800 rounded w-16 animate-pulse" />
+            <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-zinc-100">{stats.activeNodes}</p>
+            <p className="text-xl font-mono font-bold text-white">{stats.activeNodes}</p>
           )}
-          <p className="text-xs text-zinc-500">Active on network</p>
+          <p className="text-[10px] text-purple-400 mt-1">Active</p>
         </div>
 
-        {/* Total Credits */}
-        <div className="bg-zinc-900/50 border border-cyan-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="h-4 w-4 text-cyan-400" />
-            <p className="text-xs text-cyan-400 uppercase tracking-wide">Credits</p>
-          </div>
+        {/* Credits */}
+        <div className="bg-black p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Network Credits</p>
           {loading ? (
-            <div className="h-7 bg-zinc-800 rounded w-20 animate-pulse" />
+            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-cyan-400">
-              {(stats.totalCredits / 1000000).toFixed(1)}M
-            </p>
+            <p className="text-xl font-mono font-bold text-cyan-400">{formatNumber(stats.totalCredits)}</p>
           )}
-          <p className="text-xs text-zinc-500">Network activity</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Total activity</p>
         </div>
 
         {/* XAND Price */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Coins className="h-4 w-4 text-zinc-500" />
-            <p className="text-xs text-zinc-500 uppercase tracking-wide">XAND</p>
-          </div>
+        <div className="bg-black p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">XAND</p>
           {loading ? (
-            <div className="h-7 bg-zinc-800 rounded w-20 animate-pulse" />
+            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-zinc-100">
-              ${stats.xandPrice.toFixed(4)}
-            </p>
+            <p className="text-xl font-mono font-bold text-white">${stats.xandPrice.toFixed(4)}</p>
           )}
-          <p className={`text-xs ${stats.priceChange >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+          <p className={`text-[10px] mt-1 font-mono ${stats.priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {stats.priceChange >= 0 ? '+' : ''}{stats.priceChange.toFixed(2)}%
           </p>
         </div>
 
         {/* Market Cap */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Coins className="h-4 w-4 text-zinc-500" />
-            <p className="text-xs text-zinc-500 uppercase tracking-wide">Market Cap</p>
-          </div>
+        <div className="bg-black p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Market Cap</p>
           {loading ? (
-            <div className="h-7 bg-zinc-800 rounded w-20 animate-pulse" />
+            <div className="h-6 w-16 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-zinc-100">
-              {formatMarketCap(stats.marketCap)}
-            </p>
+            <p className="text-xl font-mono font-bold text-white">${formatNumber(stats.marketCap)}</p>
           )}
-          <p className="text-xs text-zinc-500">Fully diluted</p>
+          <p className="text-[10px] text-zinc-500 mt-1">FDV</p>
         </div>
 
         {/* Epoch */}
-        <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Clock className="h-4 w-4 text-zinc-500" />
-            <p className="text-xs text-zinc-500 uppercase tracking-wide">Epoch</p>
-          </div>
+        <div className="bg-black p-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-1">Epoch</p>
           {loading ? (
-            <div className="h-7 bg-zinc-800 rounded w-16 animate-pulse" />
+            <div className="h-6 w-12 bg-zinc-900 animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-zinc-100">{stats.epoch}</p>
+            <p className="text-xl font-mono font-bold text-white">{stats.epoch}</p>
           )}
-          <p className="text-xs text-zinc-500">Current</p>
+          <p className="text-[10px] text-zinc-500 mt-1">DevNet</p>
         </div>
-      </div>
-
-      {/* Quick Links */}
-      <div className="flex flex-wrap justify-center gap-3">
-        <a
-          href="https://docs.xandeum.network"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Docs
-        </a>
-        <a
-          href="https://discord.gg/xandeum"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 rounded-lg text-sm text-white font-medium transition-colors"
-        >
-          Join Discord
-        </a>
-        <a
-          href="https://explorer.xandeum.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Explorer
-        </a>
       </div>
     </div>
   );
