@@ -706,7 +706,7 @@ export function Leaderboard() {
                             View on Explorer
                           </a>
                           <a
-                            href="https://discord.gg/xandeum"
+                            href="https://discord.com/invite/mGAxAuwnR9"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"

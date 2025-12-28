@@ -32,7 +32,7 @@ export function Footer() {
             Docs <ExternalLink className="h-3 w-3" />
           </a>
           <a
-            href="https://discord.gg/xandeum"
+            href="https://discord.com/invite/mGAxAuwnR9"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-zinc-500 hover:text-white transition-colors flex items-center gap-1"

@@ -105,7 +105,7 @@ export function NetworkOverview() {
               Docs
             </a>
             <a
-              href="https://discord.gg/xandeum"
+              href="https://discord.com/invite/mGAxAuwnR9"
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
@@ -121,41 +121,43 @@ export function NetworkOverview() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-purple-500/10">
         {/* Left: Network Stats */}
         <div className="bg-[#080808] p-4 md:p-5">
-          <p className="text-[10px] uppercase tracking-wider text-purple-400 mb-3">Network</p>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="text-[10px] uppercase tracking-wider text-purple-400">Network</p>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-[9px] text-emerald-400 uppercase">Live</span>
+            </span>
+          </div>
           
           <div className="grid grid-cols-3 gap-3">
             {/* pNodes */}
             <div>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-[9px] text-emerald-400 uppercase">Live</span>
-              </div>
               {loading ? (
                 <div className="h-7 w-12 bg-zinc-900 animate-pulse" />
               ) : (
                 <p className="text-xl md:text-2xl font-mono font-bold text-white">{stats.activeNodes}</p>
               )}
-              <p className="text-[10px] text-zinc-500 mt-0.5">pNodes earning SOL</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">pNodes</p>
             </div>
 
             {/* Storage */}
             <div>
               {loading ? (
-                <div className="h-7 w-16 bg-zinc-900 animate-pulse mt-4" />
+                <div className="h-7 w-16 bg-zinc-900 animate-pulse" />
               ) : (
-                <p className="text-xl md:text-2xl font-mono font-bold text-cyan-400 mt-4">{stats.totalStorage}</p>
+                <p className="text-xl md:text-2xl font-mono font-bold text-cyan-400">{stats.totalStorage}</p>
               )}
-              <p className="text-[10px] text-zinc-500 mt-0.5">Committed storage</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Storage</p>
             </div>
 
             {/* Uptime */}
             <div>
               {loading ? (
-                <div className="h-7 w-12 bg-zinc-900 animate-pulse mt-4" />
+                <div className="h-7 w-12 bg-zinc-900 animate-pulse" />
               ) : (
-                <p className="text-xl md:text-2xl font-mono font-bold text-emerald-400 mt-4">{stats.avgUptime}</p>
+                <p className="text-xl md:text-2xl font-mono font-bold text-emerald-400">{stats.avgUptime}</p>
               )}
-              <p className="text-[10px] text-zinc-500 mt-0.5">Avg time online</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Avg Uptime</p>
             </div>
           </div>
 
@@ -164,7 +166,7 @@ export function NetworkOverview() {
             <p className="text-xs text-zinc-500">
               Epoch <span className="text-white font-mono">{stats.epoch}</span>
               <span className="text-zinc-600 mx-2">•</span>
-              Rewards distributed every ~2 days
+              Rewards every ~2 days
             </p>
           </div>
         </div>
