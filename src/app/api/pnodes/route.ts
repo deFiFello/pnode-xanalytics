@@ -218,7 +218,7 @@ export async function GET() {
       });
 
       // Fetch geolocation for nodes with IPs (limit to 40 to stay under rate limit)
-      const uniqueIps = [...new Set(nodesWithoutGeo.filter(n => n.ip).map(n => n.ip as string))];
+      const uniqueIps = Array.from(new Set(nodesWithoutGeo.filter(n => n.ip).map(n => n.ip as string)));
       const ipsToFetch = uniqueIps.filter(ip => !geoCache.has(ip)).slice(0, 40);
       
       // Batch fetch geolocation (parallel but limited)
