@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Copy, ExternalLink, Check, ChevronUp, ChevronDown } from 'lucide-react';
+import { Copy, ExternalLink, Check, ChevronUp, ChevronDown, Filter } from 'lucide-react';
+
+interface GeoLocation {
+  country: string;
+  countryCode: string;
+  city: string;
+}
 
 interface PNode {
   id: string;
@@ -15,14 +21,25 @@ interface PNode {
   storage_committed_formatted: string | null;
   storage_used: number | null;
   storage_used_formatted: string | null;
+  storage_utilization: number | null;
   last_seen_ago: string | null;
   activityRate: number | null;
   hasStats: boolean;
+  location: GeoLocation | null;
 }
 
 type TabType = 'leaderboard' | 'pnodes' | 'stoinc' | 'xand';
-type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime';
+type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime' | 'country';
 type SortDirection = 'asc' | 'desc';
+
+// Convert country code to flag emoji
+const countryFlag = (code: string): string => {
+  return code
+    .toUpperCase()
+    .replace(/./g, char => 
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+};
 
 export function Leaderboard() {
   const [nodes, setNodes] = useState<PNode[]>([]);
@@ -35,6 +52,9 @@ export function Leaderboard() {
   const [stats, setStats] = useState<any>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [versionFilter, setVersionFilter] = useState<string>('all');
+  const [countryFilter, setCountryFilter] = useState<string>('all');
 
   useEffect(() => {
     async function fetchNodes() {
@@ -55,13 +75,19 @@ export function Leaderboard() {
             storage_committed_formatted: node.storage_committed_formatted || null,
             storage_used: node.storage_used || null,
             storage_used_formatted: node.storage_used_formatted || null,
+            storage_utilization: node.storage_utilization || null,
             last_seen_ago: node.last_seen_ago || null,
             activityRate: node.activityRate || null,
             hasStats: node.hasStats || false,
+            location: node.location || null,
           })));
           
           if (data.stats) {
             setStats(data.stats);
+          }
+          
+          if (data.timestamp) {
+            setLastUpdated(data.timestamp);
           }
         }
       } catch (error) {
@@ -76,6 +102,17 @@ export function Leaderboard() {
 
   const maxCredits = nodes.length > 0 ? nodes[0].credits : 1;
 
+  // Get unique versions and countries for filter dropdowns
+  const uniqueVersions = useMemo(() => {
+    const versions = new Set(nodes.map(n => n.version).filter(Boolean) as string[]);
+    return ['all', ...Array.from(versions).sort()];
+  }, [nodes]);
+
+  const uniqueCountries = useMemo(() => {
+    const countries = new Set(nodes.map(n => n.location?.countryCode).filter(Boolean) as string[]);
+    return ['all', ...Array.from(countries).sort()];
+  }, [nodes]);
+
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -87,13 +124,22 @@ export function Leaderboard() {
   };
 
   const sortedNodes = useMemo(() => {
-    const filtered = nodes.filter(node =>
+    // Apply filters
+    let filtered = nodes.filter(node =>
       node.id.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    if (versionFilter !== 'all') {
+      filtered = filtered.filter(n => n.version === versionFilter);
+    }
+
+    if (countryFilter !== 'all') {
+      filtered = filtered.filter(n => n.location?.countryCode === countryFilter);
+    }
+
     return [...filtered].sort((a, b) => {
-      let aVal: number;
-      let bVal: number;
+      let aVal: number | string;
+      let bVal: number | string;
 
       switch (sortColumn) {
         case 'rank':
@@ -117,18 +163,27 @@ export function Leaderboard() {
           aVal = a.uptime || 0;
           bVal = b.uptime || 0;
           break;
+        case 'country':
+          aVal = a.location?.country || 'ZZZ';
+          bVal = b.location?.country || 'ZZZ';
+          if (typeof aVal === 'string' && typeof bVal === 'string') {
+            return sortDirection === 'asc' 
+              ? aVal.localeCompare(bVal)
+              : bVal.localeCompare(aVal);
+          }
+          return 0;
         default:
           aVal = a.rank;
           bVal = b.rank;
       }
 
       if (sortDirection === 'asc') {
-        return aVal - bVal;
+        return (aVal as number) - (bVal as number);
       } else {
-        return bVal - aVal;
+        return (bVal as number) - (aVal as number);
       }
     });
-  }, [nodes, searchQuery, sortColumn, sortDirection]);
+  }, [nodes, searchQuery, sortColumn, sortDirection, versionFilter, countryFilter]);
 
   const displayNodes = activeTab === 'leaderboard' 
     ? sortedNodes.slice(0, showCount) 
@@ -468,14 +523,47 @@ export function Leaderboard() {
       {/* Leaderboard Header */}
       {activeTab === 'leaderboard' && (
         <div className="px-3 md:px-4 py-2 md:py-3 border-b border-purple-500/10 bg-black/30">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <div>
               <p className="text-xs md:text-sm text-zinc-300">
                 <span className="text-cyan-400 font-medium">Credits</span> = storage proofs verified. 
                 <span className="text-zinc-500 ml-1 hidden md:inline">Higher credits = more work done = larger reward share.</span>
               </p>
             </div>
-            <p className="text-[10px] text-zinc-600">Click headers to sort • Click row for details</p>
+            
+            {/* Filters */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Filter className="h-3 w-3 text-zinc-600" />
+                <select
+                  value={versionFilter}
+                  onChange={(e) => setVersionFilter(e.target.value)}
+                  className="text-[10px] bg-black border border-purple-500/20 text-zinc-400 px-2 py-1 focus:outline-none focus:border-purple-500/40"
+                >
+                  <option value="all">All Versions</option>
+                  {uniqueVersions.filter(v => v !== 'all').map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={countryFilter}
+                  onChange={(e) => setCountryFilter(e.target.value)}
+                  className="text-[10px] bg-black border border-purple-500/20 text-zinc-400 px-2 py-1 focus:outline-none focus:border-purple-500/40"
+                >
+                  <option value="all">All Countries</option>
+                  {uniqueCountries.filter(c => c !== 'all').map(c => (
+                    <option key={c} value={c}>{countryFlag(c)} {c}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {lastUpdated && (
+                <span className="text-[10px] text-zinc-600 hidden md:inline">
+                  Updated {new Date(lastUpdated).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -491,13 +579,19 @@ export function Leaderboard() {
               <span>#</span>
               <SortIcon column="rank" />
             </button>
-            <div className="col-span-5 md:col-span-4">Address</div>
+            <div className="col-span-5 md:col-span-3">Address</div>
+            <button 
+              onClick={() => handleSort('country')}
+              className="col-span-1 hidden md:flex items-center gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Loc</span>
+              <SortIcon column="country" />
+            </button>
             <button 
               onClick={() => handleSort('credits')}
               className="col-span-5 md:col-span-2 flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
               <span>Credits</span>
-              <span className="hidden md:inline text-zinc-700 normal-case">work done</span>
               <SortIcon column="credits" />
             </button>
             <button 
@@ -505,14 +599,13 @@ export function Leaderboard() {
               className="col-span-2 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
               <span>Activity</span>
-              <span className="text-zinc-700 normal-case">/day</span>
               <SortIcon column="activity" />
             </button>
             <button 
               onClick={() => handleSort('version')}
               className="col-span-1 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
-              <span>Version</span>
+              <span>Ver</span>
               <SortIcon column="version" />
             </button>
             <button 
@@ -552,11 +645,22 @@ export function Leaderboard() {
                     </div>
 
                     {/* Address */}
-                    <div className="col-span-5 md:col-span-4">
+                    <div className="col-span-5 md:col-span-3">
                       <span className="font-mono text-xs md:text-sm text-zinc-300">
                         <span className="md:hidden">{node.id.slice(0, 4)}...{node.id.slice(-4)}</span>
                         <span className="hidden md:inline">{node.id.slice(0, 8)}...{node.id.slice(-4)}</span>
                       </span>
+                    </div>
+
+                    {/* Country - desktop only */}
+                    <div className="col-span-1 hidden md:block">
+                      {node.location ? (
+                        <span className="text-sm" title={`${node.location.city}, ${node.location.country}`}>
+                          {countryFlag(node.location.countryCode)}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-700 text-xs">—</span>
+                      )}
                     </div>
 
                     {/* Credits */}
@@ -592,13 +696,19 @@ export function Leaderboard() {
                   {isExpanded && (
                     <div className="px-3 md:px-4 pb-3 md:pb-4 bg-black/50">
                       <div className="border border-purple-500/20 p-3 md:p-4">
-                        {/* Full Address + IP */}
+                        {/* Full Address + IP + Location */}
                         <div className="mb-3 md:mb-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                             <p className="text-[10px] uppercase tracking-wider text-zinc-600">Full Address</p>
                             {node.ip && (
                               <span className="text-[10px] text-zinc-500">
                                 IP: <span className="font-mono text-zinc-400">{node.ip}</span>
+                              </span>
+                            )}
+                            {node.location && (
+                              <span className="text-[10px] text-zinc-500">
+                                📍 <span className="text-zinc-400">{node.location.city}, {node.location.country}</span>
+                                <span className="ml-1">{countryFlag(node.location.countryCode)}</span>
                               </span>
                             )}
                           </div>
@@ -668,7 +778,16 @@ export function Leaderboard() {
                             </div>
                             <div className="bg-black p-2 md:p-3">
                               <p className="text-[10px] text-zinc-600 uppercase">Storage</p>
-                              <p className="text-sm font-mono text-zinc-300">{node.storage_committed_formatted || '—'}</p>
+                              <p className="text-sm font-mono text-zinc-300">
+                                {node.storage_committed_formatted || '—'}
+                                {node.storage_utilization !== null && (
+                                  <span className={`ml-1 text-[10px] ${
+                                    node.storage_utilization > 50 ? 'text-emerald-400' : 'text-zinc-500'
+                                  }`}>
+                                    ({node.storage_utilization.toFixed(0)}% used)
+                                  </span>
+                                )}
+                              </p>
                               <p className="text-[9px] text-zinc-500 mt-0.5">Capacity they contribute</p>
                             </div>
                             <div className="bg-black p-2 md:p-3">

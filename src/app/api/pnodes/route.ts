@@ -28,6 +28,17 @@ interface PrpcNode {
   version: string;
 }
 
+interface GeoLocation {
+  country: string;
+  countryCode: string;
+  city: string;
+  lat: number;
+  lon: number;
+}
+
+// Simple in-memory cache for geolocation (persists across requests in same instance)
+const geoCache = new Map<string, GeoLocation | null>();
+
 // 192.190.136.36 confirmed working - put it first
 const PUBLIC_PRPC_NODES = [
   '192.190.136.36',
@@ -35,6 +46,41 @@ const PUBLIC_PRPC_NODES = [
   '161.97.97.41',
   '62.171.138.27',
 ];
+
+async function fetchGeoLocation(ip: string): Promise<GeoLocation | null> {
+  // Check cache first
+  if (geoCache.has(ip)) {
+    return geoCache.get(ip) || null;
+  }
+  
+  try {
+    // ip-api.com - free, no API key, 45 requests/minute
+    const res = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,lat,lon`,
+      { timeout: 3000 }
+    );
+    const data = await res.json();
+    
+    if (data.status === 'success') {
+      const location: GeoLocation = {
+        country: data.country,
+        countryCode: data.countryCode,
+        city: data.city || 'Unknown',
+        lat: data.lat,
+        lon: data.lon,
+      };
+      geoCache.set(ip, location);
+      return location;
+    }
+    
+    geoCache.set(ip, null);
+    return null;
+  } catch (err) {
+    console.log(`Geo lookup failed for ${ip}`);
+    geoCache.set(ip, null);
+    return null;
+  }
+}
 
 function formatUptime(seconds: number): string {
   const days = Math.floor(seconds / 86400);
@@ -135,7 +181,8 @@ export async function GET() {
 
       const totalCredits = sortedNodes.reduce((sum, p) => sum + p.credits, 0);
 
-      const nodes = sortedNodes.map((pod, index) => {
+      // First pass: build nodes without geolocation
+      const nodesWithoutGeo = sortedNodes.map((pod, index) => {
         const stats = prpcStats.get(pod.pod_id);
         
         // Calculate time since last seen
@@ -160,6 +207,7 @@ export async function GET() {
           storage_committed_formatted: stats?.storage_committed ? formatBytes(stats.storage_committed) : null,
           storage_used: stats?.storage_used || null,
           storage_used_formatted: stats?.storage_used ? formatBytes(stats.storage_used) : null,
+          storage_utilization: stats?.storage_usage_percent || null,
           last_seen_timestamp: stats?.last_seen_timestamp || null,
           last_seen_ago: lastSeenAgo,
           activityRate: stats?.uptime && stats.uptime > 0 
@@ -168,6 +216,32 @@ export async function GET() {
           hasStats: !!stats,
         };
       });
+
+      // Fetch geolocation for nodes with IPs (limit to 40 to stay under rate limit)
+      const uniqueIps = [...new Set(nodesWithoutGeo.filter(n => n.ip).map(n => n.ip as string))];
+      const ipsToFetch = uniqueIps.filter(ip => !geoCache.has(ip)).slice(0, 40);
+      
+      // Batch fetch geolocation (parallel but limited)
+      if (ipsToFetch.length > 0) {
+        await Promise.all(ipsToFetch.map(ip => fetchGeoLocation(ip)));
+      }
+
+      // Second pass: add geolocation data
+      const nodes = nodesWithoutGeo.map(node => ({
+        ...node,
+        location: node.ip ? geoCache.get(node.ip) || null : null,
+      }));
+
+      // Calculate country distribution
+      const countryCount = new Map<string, number>();
+      nodes.forEach(n => {
+        if (n.location?.countryCode) {
+          countryCount.set(n.location.countryCode, (countryCount.get(n.location.countryCode) || 0) + 1);
+        }
+      });
+      const countries = Array.from(countryCount.entries())
+        .map(([code, count]) => ({ code, count }))
+        .sort((a, b) => b.count - a.count);
 
       const nodesWithStats = nodes.filter(n => n.hasStats).length;
       const totalStorage = nodes.reduce((sum, n) => sum + (n.storage_committed || 0), 0);
@@ -216,6 +290,9 @@ export async function GET() {
           latestVersion,
           onLatestVersion,
           prpcSource: prpcStats.size > 0 ? 'live' : 'unavailable',
+          countries,
+          countryCount: countries.length,
+          versionDistribution: sortedVersions.map(([version, count]) => ({ version, count })),
         }
       });
     }
