@@ -652,7 +652,7 @@ export function Leaderboard() {
               onClick={() => handleSort('activity')}
               className="col-span-2 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
-              <span>Activity</span>
+              <span>Work</span>
               <SortIcon column="activity" />
             </button>
             <button 
@@ -724,7 +724,7 @@ export function Leaderboard() {
                       </span>
                     </div>
 
-                    {/* Activity Rate - desktop only */}
+                    {/* Work Rate - desktop only */}
                     <div className="col-span-2 hidden md:block text-right">
                       <span className={`font-mono text-xs ${node.activityRate ? 'text-purple-400' : 'text-zinc-600'}`}>
                         {node.activityRate ? `${node.activityRate.toLocaleString()}/d` : '—'}
@@ -819,11 +819,11 @@ export function Leaderboard() {
                         {node.hasStats && (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
                             <div className="bg-black p-2 md:p-3">
-                              <p className="text-[10px] text-zinc-600 uppercase">Activity Rate</p>
+                              <p className="text-[10px] text-zinc-600 uppercase">Work Rate</p>
                               <p className="text-sm font-mono text-purple-400">
                                 {node.activityRate ? `${node.activityRate.toLocaleString()}/d` : '—'}
                               </p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Higher = earning faster</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Node throughput</p>
                             </div>
                             <div className="bg-black p-2 md:p-3">
                               <p className="text-[10px] text-zinc-600 uppercase">Version</p>
@@ -834,18 +834,12 @@ export function Leaderboard() {
                               <p className="text-[10px] text-zinc-600 uppercase">Storage</p>
                               <p className="text-sm font-mono text-zinc-300">
                                 {node.storage_committed_formatted || '—'}
-                                {node.storage_utilization !== null && (
-                                  <span className={`ml-1 text-[10px] ${
-                                    node.storage_utilization > 50 ? 'text-emerald-400' : 'text-zinc-500'
-                                  }`}>
-                                    ({node.storage_utilization.toFixed(0)}% used)
-                                  </span>
-                                )}
+                                <span className="ml-1 text-[10px] text-zinc-500">ready</span>
                               </p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Capacity they contribute</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Capacity committed</p>
                             </div>
                             <div className="bg-black p-2 md:p-3">
-                              <p className="text-[10px] text-zinc-600 uppercase">Last Seen</p>
+                              <p className="text-[10px] text-zinc-600 uppercase">Online</p>
                               <p className={`text-sm font-mono ${
                                 node.last_seen_ago?.includes('Just') || node.last_seen_ago?.includes('m ago')
                                   ? 'text-emerald-400'
@@ -855,7 +849,7 @@ export function Leaderboard() {
                               }`}>
                                 {node.last_seen_ago || '—'}
                               </p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Recent = actively earning</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Verified active</p>
                             </div>
                           </div>
                         )}
@@ -932,13 +926,11 @@ function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }:
 
   return (
     <div className="p-3 md:p-4 border border-purple-500/15 bg-[#080808]">
-      {/* Why This Matters */}
+      {/* Node Summary */}
       <div className="mb-3 md:mb-4">
-        <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-2">Why This Node Matters</p>
         <p className="text-xs text-zinc-400 leading-relaxed">
-          Credits measure verified storage work. When STOINC rewards begin, each node's share of 
-          the reward pool is proportional to their credits. This node has earned <span className="text-cyan-400 font-mono">{nodeCredits.toLocaleString()}</span> credits, 
-          representing <span className="text-purple-400 font-mono">{networkShare.toFixed(3)}%</span> of network activity.
+          <span className="text-cyan-400 font-mono">{nodeCredits.toLocaleString()}</span> storage proofs verified, 
+          ranking <span className="text-white font-mono">#{nodeRank}</span> with <span className="text-purple-400 font-mono">{networkShare.toFixed(2)}%</span> of network activity.
         </p>
       </div>
 
@@ -950,7 +942,7 @@ function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }:
         </div>
         <div className="bg-black p-2 md:p-3 text-center">
           <p className="text-lg md:text-xl font-mono font-bold text-purple-400">{networkShare.toFixed(2)}%</p>
-          <p className="text-[10px] text-zinc-500">Reward Share</p>
+          <p className="text-[10px] text-zinc-500">Network Share</p>
         </div>
         <div className="bg-black p-2 md:p-3 text-center">
           <p className={`text-lg md:text-xl font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -962,39 +954,35 @@ function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }:
 
       {/* What to Watch For */}
       <div className="p-3 border border-zinc-800 bg-black/50 mb-3 md:mb-4">
-        <p className="text-[10px] text-zinc-500 uppercase mb-2">What Investors Watch</p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className={`text-xs ${nodeRank <= 10 ? 'text-emerald-400' : 'text-zinc-500'}`}>
               {nodeRank <= 10 ? '✓' : '○'}
             </span>
-            <span className="text-xs text-zinc-400">Top 10 rank — consistent high performer</span>
+            <span className="text-xs text-zinc-400">Top 10 rank</span>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs ${vsAverage >= 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
               {vsAverage >= 0 ? '✓' : '○'}
             </span>
-            <span className="text-xs text-zinc-400">Above average credits — doing more work</span>
+            <span className="text-xs text-zinc-400">Above average work</span>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs ${networkShare >= 1 ? 'text-emerald-400' : 'text-zinc-500'}`}>
               {networkShare >= 1 ? '✓' : '○'}
             </span>
-            <span className="text-xs text-zinc-400">1%+ network share — significant portion of rewards</span>
+            <span className="text-xs text-zinc-400">1%+ network share</span>
           </div>
         </div>
       </div>
 
-      {/* Status */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-[10px] text-emerald-400 uppercase tracking-wider">✓ Mainnet Alpha Live</span>
-        <span className="text-zinc-600">•</span>
-        <span className="text-[10px] text-purple-400 uppercase tracking-wider">Public Delegation Next</span>
-      </div>
-
-      <div className="p-2 md:p-3 border-l-2 border-emerald-500 bg-emerald-500/5">
-        <p className="text-xs text-zinc-400">
-          <strong className="text-emerald-400">Track this node.</strong> When public delegation opens, nodes with proven track records will likely attract more stake.
+      {/* The Hook */}
+      <div className="p-2 md:p-3 border-l-2 border-purple-500 bg-purple-500/5">
+        <p className="text-xs text-zinc-300">
+          <strong className="text-purple-400">When Solana dApps need storage, fees flow.</strong>
+        </p>
+        <p className="text-xs text-zinc-500 mt-1">
+          94% goes directly to node operators — credits determine your cut.
         </p>
       </div>
     </div>
