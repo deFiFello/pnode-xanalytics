@@ -31,6 +31,7 @@ interface PNode {
 type TabType = 'leaderboard' | 'pnodes' | 'stoinc' | 'xand';
 type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime' | 'country';
 type SortDirection = 'asc' | 'desc';
+type NetworkType = 'mainnet' | 'devnet';
 
 // Convert country code to flag emoji
 const countryFlag = (code: string): string => {
@@ -55,11 +56,13 @@ export function Leaderboard() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [versionFilter, setVersionFilter] = useState<string>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [network, setNetwork] = useState<NetworkType>('mainnet');
 
   useEffect(() => {
     async function fetchNodes() {
+      setLoading(true);
       try {
-        const res = await fetch('/api/pnodes');
+        const res = await fetch(`/api/pnodes?network=${network}`);
         const data = await res.json();
         
         if (data.success && data.nodes) {
@@ -98,7 +101,7 @@ export function Leaderboard() {
     }
 
     fetchNodes();
-  }, []);
+  }, [network]);
 
   const maxCredits = nodes.length > 0 ? nodes[0].credits : 1;
 
@@ -221,7 +224,9 @@ export function Leaderboard() {
       <div className="border border-purple-500/15 bg-[#080808]">
         <div className="p-8 flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-zinc-500 text-sm">Loading pNodes from network...</span>
+          <span className="ml-3 text-zinc-500 text-sm">
+            Loading pNodes from {network === 'mainnet' ? 'Mainnet Alpha' : 'DevNet'}...
+          </span>
         </div>
       </div>
     );
@@ -494,8 +499,32 @@ export function Leaderboard() {
           </button>
         ))}
         
-        {/* Search - right aligned, hidden on mobile */}
-        <div className="hidden md:flex ml-auto items-center px-4">
+        {/* Network Toggle + Search - right aligned */}
+        <div className="hidden md:flex ml-auto items-center gap-3 px-4">
+          {/* Network Toggle */}
+          <div className="flex items-center gap-1 bg-black border border-purple-500/20 p-0.5">
+            <button
+              onClick={() => setNetwork('mainnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'mainnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              MAINNET
+            </button>
+            <button
+              onClick={() => setNetwork('devnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'devnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              DEVNET
+            </button>
+          </div>
+          
           <input
             type="text"
             placeholder="Search address..."
@@ -506,15 +535,40 @@ export function Leaderboard() {
         </div>
       </div>
 
-      {/* Mobile Search */}
-      <div className="md:hidden p-3 border-b border-purple-500/10">
-        <input
-          type="text"
-          placeholder="Search address..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 text-xs bg-black border border-purple-500/20 text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500/40"
-        />
+      {/* Mobile Search + Network Toggle */}
+      <div className="md:hidden p-3 border-b border-purple-500/10 space-y-2">
+        <div className="flex items-center gap-2">
+          {/* Network Toggle Mobile */}
+          <div className="flex items-center gap-1 bg-black border border-purple-500/20 p-0.5">
+            <button
+              onClick={() => setNetwork('mainnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'mainnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              MAINNET
+            </button>
+            <button
+              onClick={() => setNetwork('devnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'devnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              DEVNET
+            </button>
+          </div>
+          <input
+            type="text"
+            placeholder="Search address..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 px-3 py-2 text-xs bg-black border border-purple-500/20 text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500/40"
+          />
+        </div>
       </div>
 
       {/* Education Content */}

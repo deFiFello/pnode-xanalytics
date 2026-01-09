@@ -42,7 +42,8 @@ export function NetworkOverview() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const nodesRes = await fetch('/api/pnodes');
+        // Default to mainnet
+        const nodesRes = await fetch('/api/pnodes?network=mainnet');
         const nodesData = await nodesRes.json();
         
         const priceRes = await fetch(

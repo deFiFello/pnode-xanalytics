@@ -140,20 +140,38 @@ async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
   return statsMap;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get network from query params (default to mainnet)
+    const { searchParams } = new URL(request.url);
+    const network = searchParams.get('network') || 'mainnet';
+    
+    // Network-specific endpoints
+    const endpoints = {
+      mainnet: {
+        credits: 'https://podcredits.xandeum.network/api/mainnet-pod-credits',
+        rpc: 'https://api.mainnet.xandeum.com:8899',
+      },
+      devnet: {
+        credits: 'https://podcredits.xandeum.network/api/pods-credits',
+        rpc: 'https://api.devnet.xandeum.com:8899',
+      },
+    };
+    
+    const activeEndpoints = endpoints[network as keyof typeof endpoints] || endpoints.mainnet;
+    
     // Fetch credits (use global fetch for HTTPS)
-    const creditsResponse = await globalThis.fetch('https://podcredits.xandeum.network/api/pods-credits', {
+    const creditsResponse = await globalThis.fetch(activeEndpoints.credits, {
       headers: { 'Accept': 'application/json' },
     });
 
     // Fetch pRPC stats (uses node-fetch for HTTP port 6000)
     const prpcStats = await fetchPrpcStats();
 
-    // Fetch epoch
+    // Fetch epoch (may fail on mainnet alpha)
     let currentEpoch = 0;
     try {
-      const epochResponse = await globalThis.fetch('https://api.devnet.xandeum.com:8899', {
+      const epochResponse = await globalThis.fetch(activeEndpoints.rpc, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,6 +289,7 @@ export async function GET() {
 
       return NextResponse.json({
         success: true,
+        network,
         source: prpcStats.size > 0 ? 'podcredits + pRPC' : 'podcredits.xandeum.network',
         count: nodes.length,
         nodes,
