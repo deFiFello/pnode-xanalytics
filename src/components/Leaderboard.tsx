@@ -860,11 +860,12 @@ export function Leaderboard() {
                           </div>
                         )}
 
-                        {/* Stake Calculator */}
-                        <StakeCalculator 
+                        {/* Node Insights */}
+                        <NodeInsights 
                           nodeCredits={node.credits} 
                           totalNetworkCredits={nodes.reduce((a, n) => a + n.credits, 0)}
                           nodeCount={nodes.length}
+                          nodeRank={node.rank}
                         />
 
                         {/* Actions */}
@@ -885,7 +886,7 @@ export function Leaderboard() {
                             className="flex items-center gap-2 px-3 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
                             style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
                           >
-                            Start Delegating →
+                            Join Discord →
                           </a>
                         </div>
                       </div>
@@ -918,69 +919,82 @@ export function Leaderboard() {
   );
 }
 
-// Node Performance Details Component
-function StakeCalculator({ nodeCredits, totalNetworkCredits, nodeCount }: { nodeCredits: number; totalNetworkCredits: number; nodeCount: number }) {
+// Node Insights Component - Informational, no mock data
+function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }: { 
+  nodeCredits: number; 
+  totalNetworkCredits: number; 
+  nodeCount: number;
+  nodeRank: number;
+}) {
+  const networkShare = (nodeCredits / totalNetworkCredits) * 100;
   const avgCredits = totalNetworkCredits / nodeCount;
   const vsAverage = ((nodeCredits / avgCredits) - 1) * 100;
 
   return (
     <div className="p-3 md:p-4 border border-purple-500/15 bg-[#080808]">
-      {/* vs Average highlight */}
-      <div className="mb-3 md:mb-4 p-3 border border-purple-500/10 bg-purple-500/5">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs text-zinc-400">Performance vs Network</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">
-              {vsAverage >= 20 ? 'Outperforming most nodes' : vsAverage >= 0 ? 'Above average performer' : 'Below network average'}
-            </p>
-          </div>
-          <span className={`text-lg font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
-            {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}%
-          </span>
-        </div>
-      </div>
-
-      {/* What's Coming */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] text-emerald-400 uppercase tracking-wider">✓ Mainnet Alpha Live</span>
-          <span className="text-zinc-600">•</span>
-          <span className="text-[10px] text-purple-400 uppercase tracking-wider">Delegation Next</span>
-        </div>
-        <p className="text-xs text-zinc-400 mb-3">
-          35 nodes actively earning credits. These features unlock with public delegation:
+      {/* Why This Matters */}
+      <div className="mb-3 md:mb-4">
+        <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-2">Why This Node Matters</p>
+        <p className="text-xs text-zinc-400 leading-relaxed">
+          Credits measure verified storage work. When STOINC rewards begin, each node's share of 
+          the reward pool is proportional to their credits. This node has earned <span className="text-cyan-400 font-mono">{nodeCredits.toLocaleString()}</span> credits, 
+          representing <span className="text-purple-400 font-mono">{networkShare.toFixed(3)}%</span> of network activity.
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">Pool stake total</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">XAND delegated to this node</p>
+      </div>
+
+      {/* Key Metrics Summary */}
+      <div className="grid grid-cols-3 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className="text-lg md:text-xl font-mono font-bold text-white">#{nodeRank}</p>
+          <p className="text-[10px] text-zinc-500">Network Rank</p>
+        </div>
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className="text-lg md:text-xl font-mono font-bold text-purple-400">{networkShare.toFixed(2)}%</p>
+          <p className="text-[10px] text-zinc-500">Reward Share</p>
+        </div>
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className={`text-lg md:text-xl font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}%
+          </p>
+          <p className="text-[10px] text-zinc-500">vs Average</p>
+        </div>
+      </div>
+
+      {/* What to Watch For */}
+      <div className="p-3 border border-zinc-800 bg-black/50 mb-3 md:mb-4">
+        <p className="text-[10px] text-zinc-500 uppercase mb-2">What Investors Watch</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${nodeRank <= 10 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {nodeRank <= 10 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">Top 10 rank — consistent high performer</span>
           </div>
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">Delegator count</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">More = smaller individual share</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${vsAverage >= 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {vsAverage >= 0 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">Above average credits — doing more work</span>
           </div>
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">APY estimate</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Projected annual return</p>
-          </div>
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">Projected earnings</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Your share based on stake</p>
-          </div>
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">Reward history</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">SOL distributions over time</p>
-          </div>
-          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
-            <span className="text-xs text-zinc-400">Operator fee</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">% kept by node operator</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${networkShare >= 1 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {networkShare >= 1 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">1%+ network share — significant portion of rewards</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 md:mt-4 p-2 md:p-3 border-l-2 border-emerald-500 bg-emerald-500/5">
+      {/* Status */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] text-emerald-400 uppercase tracking-wider">✓ Mainnet Alpha Live</span>
+        <span className="text-zinc-600">•</span>
+        <span className="text-[10px] text-purple-400 uppercase tracking-wider">Public Delegation Next</span>
+      </div>
+
+      <div className="p-2 md:p-3 border-l-2 border-emerald-500 bg-emerald-500/5">
         <p className="text-xs text-zinc-400">
-          <strong className="text-emerald-400">You're early.</strong> Join Discord to coordinate with the Foundation Delegation Program before public launch.
+          <strong className="text-emerald-400">Track this node.</strong> When public delegation opens, nodes with proven track records will likely attract more stake.
         </p>
       </div>
     </div>
