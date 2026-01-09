@@ -785,52 +785,52 @@ export function Leaderboard() {
 
                         {/* Performance Overview */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
-                          <div className="bg-black p-2 md:p-3">
+                          <div className="bg-black p-2 md:p-3 cursor-help" title="Ranked by credits earned. Higher rank = more verified work = larger share of SOL rewards.">
                             <p className="text-[10px] text-zinc-600 uppercase">Rank</p>
                             <p className="text-base md:text-lg font-mono font-bold text-white">#{node.rank}</p>
                             <p className="text-[10px] text-zinc-500 mt-1">
-                              {node.rank <= 3 ? 'Top 3 — highest performers' : node.rank <= 10 ? 'Top 10 — excellent track record' : `#${node.rank} of ${nodes.length}`}
+                              {node.rank <= 3 ? 'Top 3 — proven performer' : node.rank <= 10 ? 'Top 10 — strong track record' : `#${node.rank} of ${nodes.length}`}
                             </p>
                           </div>
-                          <div className="bg-black p-2 md:p-3">
+                          <div className="bg-black p-2 md:p-3 cursor-help" title="Each credit = one verified storage proof. When STOINC begins, your SOL share is proportional to credits earned.">
                             <p className="text-[10px] text-cyan-400 uppercase">Credits</p>
                             <p className="text-base md:text-lg font-mono font-bold text-cyan-400">{node.credits.toLocaleString()}</p>
-                            <p className="text-[10px] text-zinc-500 mt-1">Work verified = rewards earned</p>
+                            <p className="text-[10px] text-zinc-500 mt-1">Verified work → SOL share</p>
                           </div>
-                          <div className="bg-black p-2 md:p-3">
+                          <div className="bg-black p-2 md:p-3 cursor-help" title="Time continuously online. Longer uptime = more reliable for earning consistent rewards.">
                             <p className="text-[10px] text-emerald-400 uppercase">Uptime</p>
                             <p className={`text-base md:text-lg font-mono font-bold ${node.uptimeFormatted ? 'text-emerald-400' : 'text-zinc-600'}`}>
                               {node.uptimeFormatted || '—'}
                             </p>
                             <p className="text-[10px] text-zinc-500 mt-1">
-                              {node.uptime && node.uptime > 86400 * 7 ? 'Reliable — 7+ days continuously' : node.uptime ? 'Time continuously online' : 'Connecting...'}
+                              {node.uptime && node.uptime > 86400 * 7 ? '7+ days — reliable' : node.uptime ? 'Time online' : 'Connecting...'}
                             </p>
                           </div>
-                          <div className="bg-black p-2 md:p-3">
+                          <div className="bg-black p-2 md:p-3 cursor-help" title={`This node earns ${((node.credits / nodes.reduce((a, n) => a + n.credits, 0)) * 100).toFixed(2)}% of all SOL distributed to operators. Based on credits vs total network.`}>
                             <p className="text-[10px] text-purple-400 uppercase">Network Share</p>
                             <p className="text-base md:text-lg font-mono font-bold text-purple-400">
                               {((node.credits / nodes.reduce((a, n) => a + n.credits, 0)) * 100).toFixed(3)}%
                             </p>
-                            <p className="text-[10px] text-zinc-500 mt-1">This node's cut of rewards</p>
+                            <p className="text-[10px] text-zinc-500 mt-1">Your cut of SOL rewards</p>
                           </div>
                         </div>
 
                         {/* Additional Stats (if available) */}
                         {node.hasStats && (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
-                            <div className="bg-black p-2 md:p-3">
+                            <div className="bg-black p-2 md:p-3 cursor-help" title="Daily throughput volume. Higher work rate indicates a more active, productive node.">
                               <p className="text-[10px] text-zinc-600 uppercase">Work Rate</p>
                               <p className="text-sm font-mono text-purple-400">
                                 {node.activityRate ? `${node.activityRate.toLocaleString()}/d` : '—'}
                               </p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Node throughput</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Daily throughput</p>
                             </div>
-                            <div className="bg-black p-2 md:p-3">
+                            <div className="bg-black p-2 md:p-3 cursor-help" title="Software version. Nodes on latest versions are well-maintained and optimized.">
                               <p className="text-[10px] text-zinc-600 uppercase">Version</p>
                               <p className="text-sm font-mono text-zinc-300">{node.version?.split('-')[0] || '—'}</p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Latest = well maintained</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Latest = maintained</p>
                             </div>
-                            <div className="bg-black p-2 md:p-3">
+                            <div className="bg-black p-2 md:p-3 cursor-help" title="Storage capacity committed to the network. More storage = can handle more dApp data.">
                               <p className="text-[10px] text-zinc-600 uppercase">Storage</p>
                               <p className="text-sm font-mono text-zinc-300">
                                 {node.storage_committed_formatted || '—'}
@@ -838,7 +838,7 @@ export function Leaderboard() {
                               </p>
                               <p className="text-[9px] text-zinc-500 mt-0.5">Capacity committed</p>
                             </div>
-                            <div className="bg-black p-2 md:p-3">
+                            <div className="bg-black p-2 md:p-3 cursor-help" title="Last network activity. Recent = actively participating and earning.">
                               <p className="text-[10px] text-zinc-600 uppercase">Online</p>
                               <p className={`text-sm font-mono ${
                                 node.last_seen_ago?.includes('Just') || node.last_seen_ago?.includes('m ago')
@@ -849,7 +849,7 @@ export function Leaderboard() {
                               }`}>
                                 {node.last_seen_ago || '—'}
                               </p>
-                              <p className="text-[9px] text-zinc-500 mt-0.5">Verified active</p>
+                              <p className="text-[9px] text-zinc-500 mt-0.5">Last activity</p>
                             </div>
                           </div>
                         )}
@@ -926,53 +926,27 @@ function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }:
 
   return (
     <div className="p-3 md:p-4 border border-purple-500/15 bg-[#080808]">
-      {/* Node Summary */}
-      <div className="mb-3 md:mb-4">
-        <p className="text-xs text-zinc-400 leading-relaxed">
-          <span className="text-cyan-400 font-mono">{nodeCredits.toLocaleString()}</span> storage proofs verified, 
-          ranking <span className="text-white font-mono">#{nodeRank}</span> with <span className="text-purple-400 font-mono">{networkShare.toFixed(2)}%</span> of network activity.
-        </p>
-      </div>
-
-      {/* Key Metrics Summary */}
-      <div className="grid grid-cols-3 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
-        <div className="bg-black p-2 md:p-3 text-center">
-          <p className="text-lg md:text-xl font-mono font-bold text-white">#{nodeRank}</p>
-          <p className="text-[10px] text-zinc-500">Network Rank</p>
+      {/* Quick Assessment */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 md:mb-4">
+        <div className="flex items-center gap-2 cursor-help" title="Nodes ranked in top 10 have proven track records of consistent performance.">
+          <span className={`text-xs ${nodeRank <= 10 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+            {nodeRank <= 10 ? '✓' : '○'}
+          </span>
+          <span className={`text-xs ${nodeRank <= 10 ? 'text-zinc-300' : 'text-zinc-500'}`}>Top 10</span>
         </div>
-        <div className="bg-black p-2 md:p-3 text-center">
-          <p className="text-lg md:text-xl font-mono font-bold text-purple-400">{networkShare.toFixed(2)}%</p>
-          <p className="text-[10px] text-zinc-500">Network Share</p>
+        <div className="flex items-center gap-2 cursor-help" title={`This node is ${vsAverage >= 0 ? '+' : ''}${vsAverage.toFixed(0)}% vs network average. More work = larger SOL share.`}>
+          <span className={`text-xs ${vsAverage >= 0 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+            {vsAverage >= 0 ? '✓' : '○'}
+          </span>
+          <span className={`text-xs ${vsAverage >= 0 ? 'text-zinc-300' : 'text-zinc-500'}`}>
+            {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}% vs avg
+          </span>
         </div>
-        <div className="bg-black p-2 md:p-3 text-center">
-          <p className={`text-lg md:text-xl font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
-            {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}%
-          </p>
-          <p className="text-[10px] text-zinc-500">vs Average</p>
-        </div>
-      </div>
-
-      {/* What to Watch For */}
-      <div className="p-3 border border-zinc-800 bg-black/50 mb-3 md:mb-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${nodeRank <= 10 ? 'text-emerald-400' : 'text-zinc-500'}`}>
-              {nodeRank <= 10 ? '✓' : '○'}
-            </span>
-            <span className="text-xs text-zinc-400">Top 10 rank</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${vsAverage >= 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
-              {vsAverage >= 0 ? '✓' : '○'}
-            </span>
-            <span className="text-xs text-zinc-400">Above average work</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${networkShare >= 1 ? 'text-emerald-400' : 'text-zinc-500'}`}>
-              {networkShare >= 1 ? '✓' : '○'}
-            </span>
-            <span className="text-xs text-zinc-400">1%+ network share</span>
-          </div>
+        <div className="flex items-center gap-2 cursor-help" title={`${networkShare.toFixed(2)}% network share = ${networkShare.toFixed(2)}% of all SOL distributed to operators.`}>
+          <span className={`text-xs ${networkShare >= 1 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+            {networkShare >= 1 ? '✓' : '○'}
+          </span>
+          <span className={`text-xs ${networkShare >= 1 ? 'text-zinc-300' : 'text-zinc-500'}`}>1%+ share</span>
         </div>
       </div>
 
