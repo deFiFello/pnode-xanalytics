@@ -435,10 +435,10 @@ export function Leaderboard() {
             <div>
               <h3 className="text-base font-bold text-white mb-3 md:mb-4">How to Delegate</h3>
               
-              <div className="p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 mb-4 md:mb-6">
-                <p className="text-xs text-cyan-400 uppercase mb-2">Before Mainnet</p>
+              <div className="p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4 md:mb-6">
+                <p className="text-xs text-emerald-400 uppercase mb-2">✓ Mainnet Alpha Live</p>
                 <p className="text-xs md:text-sm text-zinc-300">
-                  Delegation coordinated through Discord and the Foundation Delegation Program (XFDP). Public staking coming with mainnet.
+                  35 nodes actively earning. Delegation currently coordinated through Discord and the Foundation Delegation Program. Public staking launches next.
                 </p>
               </div>
 
@@ -942,39 +942,45 @@ function StakeCalculator({ nodeCredits, totalNetworkCredits, nodeCount }: { node
 
       {/* What's Coming */}
       <div>
-        <p className="text-[10px] text-cyan-400 uppercase mb-2">Coming with Mainnet</p>
-        <p className="text-xs text-zinc-500 mb-3">These features unlock when public delegation goes live:</p>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] text-emerald-400 uppercase tracking-wider">✓ Mainnet Alpha Live</span>
+          <span className="text-zinc-600">•</span>
+          <span className="text-[10px] text-purple-400 uppercase tracking-wider">Delegation Next</span>
+        </div>
+        <p className="text-xs text-zinc-400 mb-3">
+          35 nodes actively earning credits. These features unlock with public delegation:
+        </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Pool stake total</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">Pool stake total</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">XAND delegated to this node</p>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Delegator count</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">Delegator count</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">More = smaller individual share</p>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">APY estimate</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">APY estimate</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">Projected annual return</p>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Projected earnings</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">Projected earnings</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">Your share based on stake</p>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Reward history</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">Reward history</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">SOL distributions over time</p>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Operator fee</span>
+          <div className="p-2 md:p-3 border border-purple-500/20 bg-purple-500/5">
+            <span className="text-xs text-zinc-400">Operator fee</span>
             <p className="text-[10px] text-zinc-600 mt-0.5">% kept by node operator</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 md:mt-4 p-2 md:p-3 border-l-2 border-purple-500 bg-purple-500/5">
+      <div className="mt-3 md:mt-4 p-2 md:p-3 border-l-2 border-emerald-500 bg-emerald-500/5">
         <p className="text-xs text-zinc-400">
-          <strong className="text-purple-400">Want early access?</strong> Join Discord to coordinate with the Foundation Delegation Program.
+          <strong className="text-emerald-400">You're early.</strong> Join Discord to coordinate with the Foundation Delegation Program before public launch.
         </p>
       </div>
     </div>
