@@ -39,13 +39,18 @@ interface GeoLocation {
 // Simple in-memory cache for geolocation (persists across requests in same instance)
 const geoCache = new Map<string, GeoLocation | null>();
 
-// 192.190.136.36 confirmed working - put it first
-const PUBLIC_PRPC_NODES = [
-  '192.190.136.36',
-  '207.244.255.1',
-  '161.97.97.41',
-  '62.171.138.27',
-];
+// pRPC nodes by network
+const PRPC_NODES = {
+  devnet: [
+    '192.190.136.36',  // confirmed working
+    '207.244.255.1',
+    '161.97.97.41',
+    '62.171.138.27',
+  ],
+  mainnet: [
+    '173.212.220.65',  // from official xandeum-prpc crate docs
+  ],
+};
 
 async function fetchGeoLocation(ip: string): Promise<GeoLocation | null> {
   // Check cache first
@@ -97,12 +102,13 @@ function formatBytes(bytes: number): string {
   return `${bytes} B`;
 }
 
-async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
+async function fetchPrpcStats(network: 'mainnet' | 'devnet' = 'devnet'): Promise<Map<string, PrpcNode>> {
   const statsMap = new Map<string, PrpcNode>();
+  const nodesToTry = PRPC_NODES[network] || PRPC_NODES.devnet;
   
-  for (const ip of PUBLIC_PRPC_NODES) {
+  for (const ip of nodesToTry) {
     try {
-      console.log(`Trying pRPC at ${ip}:6000...`);
+      console.log(`Trying pRPC at ${ip}:6000 (${network})...`);
       
       const res = await fetch(`http://${ip}:6000/rpc`, {
         method: 'POST',
@@ -128,7 +134,7 @@ async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
         pods.forEach((node: PrpcNode) => {
           statsMap.set(node.pubkey, node);
         });
-        console.log(`pRPC SUCCESS: Got ${pods.length} nodes from ${ip}`);
+        console.log(`pRPC SUCCESS (${network}): Got ${pods.length} nodes from ${ip}`);
         break;
       }
     } catch (err: any) {
@@ -166,7 +172,7 @@ export async function GET(request: Request) {
     });
 
     // Fetch pRPC stats (uses node-fetch for HTTP port 6000)
-    const prpcStats = await fetchPrpcStats();
+    const prpcStats = await fetchPrpcStats(network as 'mainnet' | 'devnet');
 
     // Fetch epoch (may fail on mainnet alpha)
     let currentEpoch = 0;
