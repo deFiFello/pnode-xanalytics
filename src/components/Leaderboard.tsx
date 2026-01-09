@@ -979,10 +979,10 @@ function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }:
       {/* The Hook */}
       <div className="p-2 md:p-3 border-l-2 border-purple-500 bg-purple-500/5">
         <p className="text-xs text-zinc-300">
-          <strong className="text-purple-400">When Solana dApps need storage, fees flow.</strong>
+          <strong className="text-purple-400">More Solana apps. More storage. More SOL.</strong>
         </p>
         <p className="text-xs text-zinc-500 mt-1">
-          94% goes directly to node operators — credits determine your cut.
+          94% of network fees go directly to operators — credits determine your share.
         </p>
       </div>
     </div>
