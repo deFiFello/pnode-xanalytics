@@ -17,6 +17,7 @@ interface NetworkStats {
   latestVersion: string | null;
   onLatestVersion: number;
   prpcSource: string;
+  countryCount: number;
 }
 
 export function NetworkOverview() {
@@ -34,13 +35,15 @@ export function NetworkOverview() {
     latestVersion: null,
     onLatestVersion: 0,
     prpcSource: 'loading',
+    countryCount: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const nodesRes = await fetch('/api/pnodes');
+        // Default to mainnet
+        const nodesRes = await fetch('/api/pnodes?network=mainnet');
         const nodesData = await nodesRes.json();
         
         const priceRes = await fetch(
@@ -63,6 +66,7 @@ export function NetworkOverview() {
           latestVersion: nodesData.stats?.latestVersion || null,
           onLatestVersion: nodesData.stats?.onLatestVersion || 0,
           prpcSource: nodesData.stats?.prpcSource || 'unavailable',
+          countryCount: nodesData.stats?.countryCount || 0,
         });
       } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -167,6 +171,12 @@ export function NetworkOverview() {
               Epoch <span className="text-white font-mono">{stats.epoch}</span>
               <span className="text-zinc-600 mx-2">•</span>
               Rewards every ~2 days
+              {stats.countryCount > 0 && (
+                <>
+                  <span className="text-zinc-600 mx-2">•</span>
+                  <span className="text-zinc-400">{stats.countryCount} countries</span>
+                </>
+              )}
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 {
   "name": "pnode-xanalytics",
-  "version": "0.67.0",
+  "version": "0.72.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

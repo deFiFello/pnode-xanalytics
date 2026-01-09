@@ -28,13 +28,64 @@ interface PrpcNode {
   version: string;
 }
 
-// 192.190.136.36 confirmed working - put it first
-const PUBLIC_PRPC_NODES = [
-  '192.190.136.36',
-  '207.244.255.1',
-  '161.97.97.41',
-  '62.171.138.27',
-];
+interface GeoLocation {
+  country: string;
+  countryCode: string;
+  city: string;
+  lat: number;
+  lon: number;
+}
+
+// Simple in-memory cache for geolocation (persists across requests in same instance)
+const geoCache = new Map<string, GeoLocation | null>();
+
+// pRPC nodes by network
+const PRPC_NODES = {
+  devnet: [
+    '192.190.136.36',  // confirmed working
+    '207.244.255.1',
+    '161.97.97.41',
+    '62.171.138.27',
+  ],
+  mainnet: [
+    '173.212.220.65',  // from official xandeum-prpc crate docs
+  ],
+};
+
+async function fetchGeoLocation(ip: string): Promise<GeoLocation | null> {
+  // Check cache first
+  if (geoCache.has(ip)) {
+    return geoCache.get(ip) || null;
+  }
+  
+  try {
+    // ip-api.com - free, no API key, 45 requests/minute
+    const res = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,lat,lon`,
+      { timeout: 3000 }
+    );
+    const data = await res.json();
+    
+    if (data.status === 'success') {
+      const location: GeoLocation = {
+        country: data.country,
+        countryCode: data.countryCode,
+        city: data.city || 'Unknown',
+        lat: data.lat,
+        lon: data.lon,
+      };
+      geoCache.set(ip, location);
+      return location;
+    }
+    
+    geoCache.set(ip, null);
+    return null;
+  } catch (err) {
+    console.log(`Geo lookup failed for ${ip}`);
+    geoCache.set(ip, null);
+    return null;
+  }
+}
 
 function formatUptime(seconds: number): string {
   const days = Math.floor(seconds / 86400);
@@ -51,12 +102,13 @@ function formatBytes(bytes: number): string {
   return `${bytes} B`;
 }
 
-async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
+async function fetchPrpcStats(network: 'mainnet' | 'devnet' = 'devnet'): Promise<Map<string, PrpcNode>> {
   const statsMap = new Map<string, PrpcNode>();
+  const nodesToTry = PRPC_NODES[network] || PRPC_NODES.devnet;
   
-  for (const ip of PUBLIC_PRPC_NODES) {
+  for (const ip of nodesToTry) {
     try {
-      console.log(`Trying pRPC at ${ip}:6000...`);
+      console.log(`Trying pRPC at ${ip}:6000 (${network})...`);
       
       const res = await fetch(`http://${ip}:6000/rpc`, {
         method: 'POST',
@@ -82,7 +134,7 @@ async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
         pods.forEach((node: PrpcNode) => {
           statsMap.set(node.pubkey, node);
         });
-        console.log(`pRPC SUCCESS: Got ${pods.length} nodes from ${ip}`);
+        console.log(`pRPC SUCCESS (${network}): Got ${pods.length} nodes from ${ip}`);
         break;
       }
     } catch (err: any) {
@@ -94,20 +146,38 @@ async function fetchPrpcStats(): Promise<Map<string, PrpcNode>> {
   return statsMap;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get network from query params (default to mainnet)
+    const { searchParams } = new URL(request.url);
+    const network = searchParams.get('network') || 'mainnet';
+    
+    // Network-specific endpoints
+    const endpoints = {
+      mainnet: {
+        credits: 'https://podcredits.xandeum.network/api/mainnet-pod-credits',
+        rpc: 'https://api.mainnet.xandeum.com:8899',
+      },
+      devnet: {
+        credits: 'https://podcredits.xandeum.network/api/pods-credits',
+        rpc: 'https://api.devnet.xandeum.com:8899',
+      },
+    };
+    
+    const activeEndpoints = endpoints[network as keyof typeof endpoints] || endpoints.mainnet;
+    
     // Fetch credits (use global fetch for HTTPS)
-    const creditsResponse = await globalThis.fetch('https://podcredits.xandeum.network/api/pods-credits', {
+    const creditsResponse = await globalThis.fetch(activeEndpoints.credits, {
       headers: { 'Accept': 'application/json' },
     });
 
     // Fetch pRPC stats (uses node-fetch for HTTP port 6000)
-    const prpcStats = await fetchPrpcStats();
+    const prpcStats = await fetchPrpcStats(network as 'mainnet' | 'devnet');
 
-    // Fetch epoch
+    // Fetch epoch (may fail on mainnet alpha)
     let currentEpoch = 0;
     try {
-      const epochResponse = await globalThis.fetch('https://api.devnet.xandeum.com:8899', {
+      const epochResponse = await globalThis.fetch(activeEndpoints.rpc, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,7 +205,8 @@ export async function GET() {
 
       const totalCredits = sortedNodes.reduce((sum, p) => sum + p.credits, 0);
 
-      const nodes = sortedNodes.map((pod, index) => {
+      // First pass: build nodes without geolocation
+      const nodesWithoutGeo = sortedNodes.map((pod, index) => {
         const stats = prpcStats.get(pod.pod_id);
         
         // Calculate time since last seen
@@ -160,6 +231,7 @@ export async function GET() {
           storage_committed_formatted: stats?.storage_committed ? formatBytes(stats.storage_committed) : null,
           storage_used: stats?.storage_used || null,
           storage_used_formatted: stats?.storage_used ? formatBytes(stats.storage_used) : null,
+          storage_utilization: stats?.storage_usage_percent || null,
           last_seen_timestamp: stats?.last_seen_timestamp || null,
           last_seen_ago: lastSeenAgo,
           activityRate: stats?.uptime && stats.uptime > 0 
@@ -168,6 +240,32 @@ export async function GET() {
           hasStats: !!stats,
         };
       });
+
+      // Fetch geolocation for nodes with IPs (limit to 40 to stay under rate limit)
+      const uniqueIps = Array.from(new Set(nodesWithoutGeo.filter(n => n.ip).map(n => n.ip as string)));
+      const ipsToFetch = uniqueIps.filter(ip => !geoCache.has(ip)).slice(0, 40);
+      
+      // Batch fetch geolocation (parallel but limited)
+      if (ipsToFetch.length > 0) {
+        await Promise.all(ipsToFetch.map(ip => fetchGeoLocation(ip)));
+      }
+
+      // Second pass: add geolocation data
+      const nodes = nodesWithoutGeo.map(node => ({
+        ...node,
+        location: node.ip ? geoCache.get(node.ip) || null : null,
+      }));
+
+      // Calculate country distribution
+      const countryCount = new Map<string, number>();
+      nodes.forEach(n => {
+        if (n.location?.countryCode) {
+          countryCount.set(n.location.countryCode, (countryCount.get(n.location.countryCode) || 0) + 1);
+        }
+      });
+      const countries = Array.from(countryCount.entries())
+        .map(([code, count]) => ({ code, count }))
+        .sort((a, b) => b.count - a.count);
 
       const nodesWithStats = nodes.filter(n => n.hasStats).length;
       const totalStorage = nodes.reduce((sum, n) => sum + (n.storage_committed || 0), 0);
@@ -197,6 +295,7 @@ export async function GET() {
 
       return NextResponse.json({
         success: true,
+        network,
         source: prpcStats.size > 0 ? 'podcredits + pRPC' : 'podcredits.xandeum.network',
         count: nodes.length,
         nodes,
@@ -216,6 +315,9 @@ export async function GET() {
           latestVersion,
           onLatestVersion,
           prpcSource: prpcStats.size > 0 ? 'live' : 'unavailable',
+          countries,
+          countryCount: countries.length,
+          versionDistribution: sortedVersions.map(([version, count]) => ({ version, count })),
         }
       });
     }

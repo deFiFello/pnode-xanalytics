@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Copy, ExternalLink, Check, ChevronUp, ChevronDown } from 'lucide-react';
+import { Copy, ExternalLink, Check, ChevronUp, ChevronDown, Filter } from 'lucide-react';
+
+interface GeoLocation {
+  country: string;
+  countryCode: string;
+  city: string;
+}
 
 interface PNode {
   id: string;
@@ -15,14 +21,26 @@ interface PNode {
   storage_committed_formatted: string | null;
   storage_used: number | null;
   storage_used_formatted: string | null;
+  storage_utilization: number | null;
   last_seen_ago: string | null;
   activityRate: number | null;
   hasStats: boolean;
+  location: GeoLocation | null;
 }
 
 type TabType = 'leaderboard' | 'pnodes' | 'stoinc' | 'xand';
-type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime';
+type SortColumn = 'rank' | 'credits' | 'activity' | 'version' | 'uptime' | 'country';
 type SortDirection = 'asc' | 'desc';
+type NetworkType = 'mainnet' | 'devnet';
+
+// Convert country code to flag emoji
+const countryFlag = (code: string): string => {
+  return code
+    .toUpperCase()
+    .replace(/./g, char => 
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+};
 
 export function Leaderboard() {
   const [nodes, setNodes] = useState<PNode[]>([]);
@@ -35,11 +53,16 @@ export function Leaderboard() {
   const [stats, setStats] = useState<any>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [versionFilter, setVersionFilter] = useState<string>('all');
+  const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [network, setNetwork] = useState<NetworkType>('mainnet');
 
   useEffect(() => {
     async function fetchNodes() {
+      setLoading(true);
       try {
-        const res = await fetch('/api/pnodes');
+        const res = await fetch(`/api/pnodes?network=${network}`);
         const data = await res.json();
         
         if (data.success && data.nodes) {
@@ -55,13 +78,19 @@ export function Leaderboard() {
             storage_committed_formatted: node.storage_committed_formatted || null,
             storage_used: node.storage_used || null,
             storage_used_formatted: node.storage_used_formatted || null,
+            storage_utilization: node.storage_utilization || null,
             last_seen_ago: node.last_seen_ago || null,
             activityRate: node.activityRate || null,
             hasStats: node.hasStats || false,
+            location: node.location || null,
           })));
           
           if (data.stats) {
             setStats(data.stats);
+          }
+          
+          if (data.timestamp) {
+            setLastUpdated(data.timestamp);
           }
         }
       } catch (error) {
@@ -72,9 +101,20 @@ export function Leaderboard() {
     }
 
     fetchNodes();
-  }, []);
+  }, [network]);
 
   const maxCredits = nodes.length > 0 ? nodes[0].credits : 1;
+
+  // Get unique versions and countries for filter dropdowns
+  const uniqueVersions = useMemo(() => {
+    const versions = new Set(nodes.map(n => n.version).filter(Boolean) as string[]);
+    return ['all', ...Array.from(versions).sort()];
+  }, [nodes]);
+
+  const uniqueCountries = useMemo(() => {
+    const countries = new Set(nodes.map(n => n.location?.countryCode).filter(Boolean) as string[]);
+    return ['all', ...Array.from(countries).sort()];
+  }, [nodes]);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -87,13 +127,22 @@ export function Leaderboard() {
   };
 
   const sortedNodes = useMemo(() => {
-    const filtered = nodes.filter(node =>
+    // Apply filters
+    let filtered = nodes.filter(node =>
       node.id.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    if (versionFilter !== 'all') {
+      filtered = filtered.filter(n => n.version === versionFilter);
+    }
+
+    if (countryFilter !== 'all') {
+      filtered = filtered.filter(n => n.location?.countryCode === countryFilter);
+    }
+
     return [...filtered].sort((a, b) => {
-      let aVal: number;
-      let bVal: number;
+      let aVal: number | string;
+      let bVal: number | string;
 
       switch (sortColumn) {
         case 'rank':
@@ -117,18 +166,27 @@ export function Leaderboard() {
           aVal = a.uptime || 0;
           bVal = b.uptime || 0;
           break;
+        case 'country':
+          aVal = a.location?.country || 'ZZZ';
+          bVal = b.location?.country || 'ZZZ';
+          if (typeof aVal === 'string' && typeof bVal === 'string') {
+            return sortDirection === 'asc' 
+              ? aVal.localeCompare(bVal)
+              : bVal.localeCompare(aVal);
+          }
+          return 0;
         default:
           aVal = a.rank;
           bVal = b.rank;
       }
 
       if (sortDirection === 'asc') {
-        return aVal - bVal;
+        return (aVal as number) - (bVal as number);
       } else {
-        return bVal - aVal;
+        return (bVal as number) - (aVal as number);
       }
     });
-  }, [nodes, searchQuery, sortColumn, sortDirection]);
+  }, [nodes, searchQuery, sortColumn, sortDirection, versionFilter, countryFilter]);
 
   const displayNodes = activeTab === 'leaderboard' 
     ? sortedNodes.slice(0, showCount) 
@@ -166,7 +224,9 @@ export function Leaderboard() {
       <div className="border border-purple-500/15 bg-[#080808]">
         <div className="p-8 flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-zinc-500 text-sm">Loading pNodes from network...</span>
+          <span className="ml-3 text-zinc-500 text-sm">
+            Loading pNodes from {network === 'mainnet' ? 'Mainnet Alpha' : 'DevNet'}...
+          </span>
         </div>
       </div>
     );
@@ -375,10 +435,10 @@ export function Leaderboard() {
             <div>
               <h3 className="text-base font-bold text-white mb-3 md:mb-4">How to Delegate</h3>
               
-              <div className="p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 mb-4 md:mb-6">
-                <p className="text-xs text-cyan-400 uppercase mb-2">Before Mainnet</p>
+              <div className="p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5 mb-4 md:mb-6">
+                <p className="text-xs text-emerald-400 uppercase mb-2">✓ Mainnet Alpha Live</p>
                 <p className="text-xs md:text-sm text-zinc-300">
-                  Delegation coordinated through Discord and the Foundation Delegation Program (XFDP). Public staking coming with mainnet.
+                  35 nodes actively earning. Delegation currently coordinated through Discord and the Foundation Delegation Program. Public staking launches next.
                 </p>
               </div>
 
@@ -439,8 +499,32 @@ export function Leaderboard() {
           </button>
         ))}
         
-        {/* Search - right aligned, hidden on mobile */}
-        <div className="hidden md:flex ml-auto items-center px-4">
+        {/* Network Toggle + Search - right aligned */}
+        <div className="hidden md:flex ml-auto items-center gap-3 px-4">
+          {/* Network Toggle */}
+          <div className="flex items-center gap-1 bg-black border border-purple-500/20 p-0.5">
+            <button
+              onClick={() => setNetwork('mainnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'mainnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              MAINNET
+            </button>
+            <button
+              onClick={() => setNetwork('devnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'devnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              DEVNET
+            </button>
+          </div>
+          
           <input
             type="text"
             placeholder="Search address..."
@@ -451,15 +535,40 @@ export function Leaderboard() {
         </div>
       </div>
 
-      {/* Mobile Search */}
-      <div className="md:hidden p-3 border-b border-purple-500/10">
-        <input
-          type="text"
-          placeholder="Search address..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 text-xs bg-black border border-purple-500/20 text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500/40"
-        />
+      {/* Mobile Search + Network Toggle */}
+      <div className="md:hidden p-3 border-b border-purple-500/10 space-y-2">
+        <div className="flex items-center gap-2">
+          {/* Network Toggle Mobile */}
+          <div className="flex items-center gap-1 bg-black border border-purple-500/20 p-0.5">
+            <button
+              onClick={() => setNetwork('mainnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'mainnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              MAINNET
+            </button>
+            <button
+              onClick={() => setNetwork('devnet')}
+              className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                network === 'devnet'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              DEVNET
+            </button>
+          </div>
+          <input
+            type="text"
+            placeholder="Search address..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 px-3 py-2 text-xs bg-black border border-purple-500/20 text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500/40"
+          />
+        </div>
       </div>
 
       {/* Education Content */}
@@ -468,14 +577,47 @@ export function Leaderboard() {
       {/* Leaderboard Header */}
       {activeTab === 'leaderboard' && (
         <div className="px-3 md:px-4 py-2 md:py-3 border-b border-purple-500/10 bg-black/30">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <div>
               <p className="text-xs md:text-sm text-zinc-300">
                 <span className="text-cyan-400 font-medium">Credits</span> = storage proofs verified. 
                 <span className="text-zinc-500 ml-1 hidden md:inline">Higher credits = more work done = larger reward share.</span>
               </p>
             </div>
-            <p className="text-[10px] text-zinc-600">Click headers to sort • Click row for details</p>
+            
+            {/* Filters */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Filter className="h-3 w-3 text-zinc-600" />
+                <select
+                  value={versionFilter}
+                  onChange={(e) => setVersionFilter(e.target.value)}
+                  className="text-[10px] bg-black border border-purple-500/20 text-zinc-400 px-2 py-1 focus:outline-none focus:border-purple-500/40"
+                >
+                  <option value="all">All Versions</option>
+                  {uniqueVersions.filter(v => v !== 'all').map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={countryFilter}
+                  onChange={(e) => setCountryFilter(e.target.value)}
+                  className="text-[10px] bg-black border border-purple-500/20 text-zinc-400 px-2 py-1 focus:outline-none focus:border-purple-500/40"
+                >
+                  <option value="all">All Countries</option>
+                  {uniqueCountries.filter(c => c !== 'all').map(c => (
+                    <option key={c} value={c}>{countryFlag(c)} {c}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {lastUpdated && (
+                <span className="text-[10px] text-zinc-600 hidden md:inline">
+                  Updated {new Date(lastUpdated).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -491,13 +633,19 @@ export function Leaderboard() {
               <span>#</span>
               <SortIcon column="rank" />
             </button>
-            <div className="col-span-5 md:col-span-4">Address</div>
+            <div className="col-span-5 md:col-span-3">Address</div>
+            <button 
+              onClick={() => handleSort('country')}
+              className="col-span-1 hidden md:flex items-center gap-1 hover:text-zinc-400 transition-colors"
+            >
+              <span>Loc</span>
+              <SortIcon column="country" />
+            </button>
             <button 
               onClick={() => handleSort('credits')}
               className="col-span-5 md:col-span-2 flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
               <span>Credits</span>
-              <span className="hidden md:inline text-zinc-700 normal-case">work done</span>
               <SortIcon column="credits" />
             </button>
             <button 
@@ -505,14 +653,13 @@ export function Leaderboard() {
               className="col-span-2 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
               <span>Activity</span>
-              <span className="text-zinc-700 normal-case">/day</span>
               <SortIcon column="activity" />
             </button>
             <button 
               onClick={() => handleSort('version')}
               className="col-span-1 hidden md:flex items-center justify-end gap-1 hover:text-zinc-400 transition-colors"
             >
-              <span>Version</span>
+              <span>Ver</span>
               <SortIcon column="version" />
             </button>
             <button 
@@ -552,11 +699,22 @@ export function Leaderboard() {
                     </div>
 
                     {/* Address */}
-                    <div className="col-span-5 md:col-span-4">
+                    <div className="col-span-5 md:col-span-3">
                       <span className="font-mono text-xs md:text-sm text-zinc-300">
                         <span className="md:hidden">{node.id.slice(0, 4)}...{node.id.slice(-4)}</span>
                         <span className="hidden md:inline">{node.id.slice(0, 8)}...{node.id.slice(-4)}</span>
                       </span>
+                    </div>
+
+                    {/* Country - desktop only */}
+                    <div className="col-span-1 hidden md:block">
+                      {node.location ? (
+                        <span className="text-sm" title={`${node.location.city}, ${node.location.country}`}>
+                          {countryFlag(node.location.countryCode)}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-700 text-xs">—</span>
+                      )}
                     </div>
 
                     {/* Credits */}
@@ -592,13 +750,19 @@ export function Leaderboard() {
                   {isExpanded && (
                     <div className="px-3 md:px-4 pb-3 md:pb-4 bg-black/50">
                       <div className="border border-purple-500/20 p-3 md:p-4">
-                        {/* Full Address + IP */}
+                        {/* Full Address + IP + Location */}
                         <div className="mb-3 md:mb-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                             <p className="text-[10px] uppercase tracking-wider text-zinc-600">Full Address</p>
                             {node.ip && (
                               <span className="text-[10px] text-zinc-500">
                                 IP: <span className="font-mono text-zinc-400">{node.ip}</span>
+                              </span>
+                            )}
+                            {node.location && (
+                              <span className="text-[10px] text-zinc-500">
+                                📍 <span className="text-zinc-400">{node.location.city}, {node.location.country}</span>
+                                <span className="ml-1">{countryFlag(node.location.countryCode)}</span>
                               </span>
                             )}
                           </div>
@@ -668,7 +832,16 @@ export function Leaderboard() {
                             </div>
                             <div className="bg-black p-2 md:p-3">
                               <p className="text-[10px] text-zinc-600 uppercase">Storage</p>
-                              <p className="text-sm font-mono text-zinc-300">{node.storage_committed_formatted || '—'}</p>
+                              <p className="text-sm font-mono text-zinc-300">
+                                {node.storage_committed_formatted || '—'}
+                                {node.storage_utilization !== null && (
+                                  <span className={`ml-1 text-[10px] ${
+                                    node.storage_utilization > 50 ? 'text-emerald-400' : 'text-zinc-500'
+                                  }`}>
+                                    ({node.storage_utilization.toFixed(0)}% used)
+                                  </span>
+                                )}
+                              </p>
                               <p className="text-[9px] text-zinc-500 mt-0.5">Capacity they contribute</p>
                             </div>
                             <div className="bg-black p-2 md:p-3">
@@ -687,11 +860,12 @@ export function Leaderboard() {
                           </div>
                         )}
 
-                        {/* Stake Calculator */}
-                        <StakeCalculator 
+                        {/* Node Insights */}
+                        <NodeInsights 
                           nodeCredits={node.credits} 
                           totalNetworkCredits={nodes.reduce((a, n) => a + n.credits, 0)}
                           nodeCount={nodes.length}
+                          nodeRank={node.rank}
                         />
 
                         {/* Actions */}
@@ -712,7 +886,7 @@ export function Leaderboard() {
                             className="flex items-center gap-2 px-3 py-2 text-xs text-white bg-purple-600 hover:bg-purple-500 transition-colors"
                             style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
                           >
-                            Start Delegating →
+                            Join Discord →
                           </a>
                         </div>
                       </div>
@@ -745,63 +919,82 @@ export function Leaderboard() {
   );
 }
 
-// Node Performance Details Component
-function StakeCalculator({ nodeCredits, totalNetworkCredits, nodeCount }: { nodeCredits: number; totalNetworkCredits: number; nodeCount: number }) {
+// Node Insights Component - Informational, no mock data
+function NodeInsights({ nodeCredits, totalNetworkCredits, nodeCount, nodeRank }: { 
+  nodeCredits: number; 
+  totalNetworkCredits: number; 
+  nodeCount: number;
+  nodeRank: number;
+}) {
+  const networkShare = (nodeCredits / totalNetworkCredits) * 100;
   const avgCredits = totalNetworkCredits / nodeCount;
   const vsAverage = ((nodeCredits / avgCredits) - 1) * 100;
 
   return (
     <div className="p-3 md:p-4 border border-purple-500/15 bg-[#080808]">
-      {/* vs Average highlight */}
-      <div className="mb-3 md:mb-4 p-3 border border-purple-500/10 bg-purple-500/5">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs text-zinc-400">Performance vs Network</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">
-              {vsAverage >= 20 ? 'Outperforming most nodes' : vsAverage >= 0 ? 'Above average performer' : 'Below network average'}
-            </p>
-          </div>
-          <span className={`text-lg font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+      {/* Why This Matters */}
+      <div className="mb-3 md:mb-4">
+        <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-2">Why This Node Matters</p>
+        <p className="text-xs text-zinc-400 leading-relaxed">
+          Credits measure verified storage work. When STOINC rewards begin, each node's share of 
+          the reward pool is proportional to their credits. This node has earned <span className="text-cyan-400 font-mono">{nodeCredits.toLocaleString()}</span> credits, 
+          representing <span className="text-purple-400 font-mono">{networkShare.toFixed(3)}%</span> of network activity.
+        </p>
+      </div>
+
+      {/* Key Metrics Summary */}
+      <div className="grid grid-cols-3 gap-[1px] bg-purple-500/10 mb-3 md:mb-4">
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className="text-lg md:text-xl font-mono font-bold text-white">#{nodeRank}</p>
+          <p className="text-[10px] text-zinc-500">Network Rank</p>
+        </div>
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className="text-lg md:text-xl font-mono font-bold text-purple-400">{networkShare.toFixed(2)}%</p>
+          <p className="text-[10px] text-zinc-500">Reward Share</p>
+        </div>
+        <div className="bg-black p-2 md:p-3 text-center">
+          <p className={`text-lg md:text-xl font-mono font-bold ${vsAverage >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {vsAverage >= 0 ? '+' : ''}{vsAverage.toFixed(0)}%
-          </span>
+          </p>
+          <p className="text-[10px] text-zinc-500">vs Average</p>
         </div>
       </div>
 
-      {/* What's Coming */}
-      <div>
-        <p className="text-[10px] text-cyan-400 uppercase mb-2">Coming with Mainnet</p>
-        <p className="text-xs text-zinc-500 mb-3">These features unlock when public delegation goes live:</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Pool stake total</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">XAND delegated to this node</p>
+      {/* What to Watch For */}
+      <div className="p-3 border border-zinc-800 bg-black/50 mb-3 md:mb-4">
+        <p className="text-[10px] text-zinc-500 uppercase mb-2">What Investors Watch</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${nodeRank <= 10 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {nodeRank <= 10 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">Top 10 rank — consistent high performer</span>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Delegator count</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">More = smaller individual share</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${vsAverage >= 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {vsAverage >= 0 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">Above average credits — doing more work</span>
           </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">APY estimate</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Projected annual return</p>
-          </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Projected earnings</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Your share based on stake</p>
-          </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Reward history</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">SOL distributions over time</p>
-          </div>
-          <div className="p-2 md:p-3 border border-zinc-800 bg-black/50">
-            <span className="text-xs text-zinc-500">Operator fee</span>
-            <p className="text-[10px] text-zinc-600 mt-0.5">% kept by node operator</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${networkShare >= 1 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {networkShare >= 1 ? '✓' : '○'}
+            </span>
+            <span className="text-xs text-zinc-400">1%+ network share — significant portion of rewards</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 md:mt-4 p-2 md:p-3 border-l-2 border-purple-500 bg-purple-500/5">
+      {/* Status */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] text-emerald-400 uppercase tracking-wider">✓ Mainnet Alpha Live</span>
+        <span className="text-zinc-600">•</span>
+        <span className="text-[10px] text-purple-400 uppercase tracking-wider">Public Delegation Next</span>
+      </div>
+
+      <div className="p-2 md:p-3 border-l-2 border-emerald-500 bg-emerald-500/5">
         <p className="text-xs text-zinc-400">
-          <strong className="text-purple-400">Want early access?</strong> Join Discord to coordinate with the Foundation Delegation Program.
+          <strong className="text-emerald-400">Track this node.</strong> When public delegation opens, nodes with proven track records will likely attract more stake.
         </p>
       </div>
     </div>
