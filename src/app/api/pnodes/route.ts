@@ -61,7 +61,7 @@ async function fetchGeoLocation(ip: string): Promise<GeoLocation | null> {
   try {
     // ip-api.com - free, no API key, 45 requests/minute
     const res = await fetch(
-      `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,lat,lon`,
+      `https://ip-api.com/json/${ip}?fields=status,country,countryCode,city,lat,lon`,
       { timeout: 3000 }
     );
     const data = await res.json();
@@ -148,9 +148,15 @@ async function fetchPrpcStats(network: 'mainnet' | 'devnet' = 'devnet'): Promise
 
 export async function GET(request: Request) {
   try {
-    // Get network from query params (default to mainnet)
-    const { searchParams } = new URL(request.url);
-    const network = searchParams.get('network') || 'mainnet';
+    
+
+// Get network from query params (default to mainnet)
+const { searchParams } = new URL(request.url);
+const networkParam = searchParams.get('network') || 'mainnet';
+
+// SECURITY: Whitelist validation to prevent SSRF attacks
+const ALLOWED_NETWORKS = ['mainnet', 'devnet', 'testnet'];
+const network = ALLOWED_NETWORKS.includes(networkParam) ? networkParam : 'mainnet';
     
     // Network-specific endpoints
     const endpoints = {
