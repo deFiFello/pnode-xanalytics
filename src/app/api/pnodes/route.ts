@@ -151,6 +151,17 @@ export async function GET(request: Request) {
     // Get network from query params (default to mainnet)
     const { searchParams } = new URL(request.url);
     const network = searchParams.get('network') || 'mainnet';
+
+
+// SECURITY: Whitelist valid networks to prevent SSRF
+const VALID_NETWORKS = ['mainnet', 'devnet', 'testnet'];
+if (!VALID_NETWORKS.includes(network)) {
+  return NextResponse.json(
+    { success: false, error: 'Invalid network parameter' },
+    { status: 400 }
+  );
+}
+
     
     // Network-specific endpoints
     const endpoints = {

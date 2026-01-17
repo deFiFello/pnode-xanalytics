@@ -1,0 +1,10 @@
+21a5fb4 v75: SOL tooltips, remove redundancy
+50e5c12 v74: SOL growth narrative
+0d0480e v73: Honest labels, STOINC hook
+b481791 Merge branch 'main' of https://github.com/deFiFello/pnode-xanalytics
+27494d7 v72: Redesigned expanded row - informational focus
+d963920 v71: Updated messaging - Mainnet Alpha live, delegation next
+ee04007 v70: Network-specific pRPC endpoints
+67e2d3c v69: Add Mainnet/DevNet toggle
+e804be0 Security fix: Upgraded Next.js 14.0.4 to 14.2.35 - resolves 13 critical CVEs including CVE-2024-34351
+9cfaf60 v68: Fix TypeScript Set iteration
