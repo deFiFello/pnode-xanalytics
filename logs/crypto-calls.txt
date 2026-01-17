@@ -1,0 +1,7 @@
+src/components/NetworkOverview.tsx:        const nodesRes = await fetch('/api/pnodes?network=mainnet');
+src/components/NetworkOverview.tsx:        const priceRes = await fetch(
+src/components/Leaderboard.tsx:        const res = await fetch(`/api/pnodes?network=${network}`);
+src/app/api/pnodes/route.ts:    const res = await fetch(
+src/app/api/pnodes/route.ts:      const res = await fetch(`http://${ip}:6000/rpc`, {
+src/app/api/pnodes/route.ts:    const creditsResponse = await globalThis.fetch(activeEndpoints.credits, {
+src/app/api/pnodes/route.ts:      const epochResponse = await globalThis.fetch(activeEndpoints.rpc, {

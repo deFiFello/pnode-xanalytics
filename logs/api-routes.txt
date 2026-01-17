@@ -1,0 +1,21 @@
+=== src/app/api/pnodes/route.ts ===
+          versionDistribution: sortedVersions.map(([version, count]) => ({ version, count })),
+        }
+      });
+    }
+
+    throw new Error('Invalid response format');
+  } catch (error) {
+    console.error('Error fetching pNode data:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch data',
+      count: 0,
+      nodes: [],
+      totalCredits: 0,
+      epoch: 0,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
