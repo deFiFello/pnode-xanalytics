@@ -1,0 +1,4 @@
+# Nmap 7.94SVN scan initiated Sat Jan 17 11:06:11 2026 as: nmap -sV --top-ports 100 -oN ../logs/nmap-quick.txt https://pnode-xanalytics.vercel.app
+Unable to split netmask from target expression: "https://pnode-xanalytics.vercel.app"
+WARNING: No targets were specified, so 0 hosts scanned.
+# Nmap done at Sat Jan 17 11:06:11 2026 -- 0 IP addresses (0 hosts up) scanned in 0.17 seconds

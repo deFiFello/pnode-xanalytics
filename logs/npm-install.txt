@@ -1,0 +1,41 @@
+npm WARN config production Use `--omit=dev` instead.
+npm ERR! code EUSAGE
+npm ERR! 
+npm ERR! `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+npm ERR! 
+npm ERR! Invalid: lock file's next@14.2.35 does not satisfy next@14.0.4
+npm ERR! Invalid: lock file's @next/env@14.2.35 does not satisfy @next/env@14.0.4
+npm ERR! Invalid: lock file's @next/swc-darwin-arm64@14.2.33 does not satisfy @next/swc-darwin-arm64@14.0.4
+npm ERR! Invalid: lock file's @next/swc-darwin-x64@14.2.33 does not satisfy @next/swc-darwin-x64@14.0.4
+npm ERR! Invalid: lock file's @next/swc-linux-arm64-gnu@14.2.33 does not satisfy @next/swc-linux-arm64-gnu@14.0.4
+npm ERR! Invalid: lock file's @next/swc-linux-arm64-musl@14.2.33 does not satisfy @next/swc-linux-arm64-musl@14.0.4
+npm ERR! Invalid: lock file's @next/swc-linux-x64-gnu@14.2.33 does not satisfy @next/swc-linux-x64-gnu@14.0.4
+npm ERR! Invalid: lock file's @next/swc-linux-x64-musl@14.2.33 does not satisfy @next/swc-linux-x64-musl@14.0.4
+npm ERR! Invalid: lock file's @next/swc-win32-arm64-msvc@14.2.33 does not satisfy @next/swc-win32-arm64-msvc@14.0.4
+npm ERR! Invalid: lock file's @next/swc-win32-ia32-msvc@14.2.33 does not satisfy @next/swc-win32-ia32-msvc@14.0.4
+npm ERR! Invalid: lock file's @next/swc-win32-x64-msvc@14.2.33 does not satisfy @next/swc-win32-x64-msvc@14.0.4
+npm ERR! Invalid: lock file's @swc/helpers@0.5.5 does not satisfy @swc/helpers@0.5.2
+npm ERR! Missing: watchpack@2.4.0 from lock file
+npm ERR! Missing: glob-to-regexp@0.4.1 from lock file
+npm ERR! 
+npm ERR! Clean install a project
+npm ERR! 
+npm ERR! Usage:
+npm ERR! npm ci
+npm ERR! 
+npm ERR! Options:
+npm ERR! [-S|--save|--no-save|--save-prod|--save-dev|--save-optional|--save-peer|--save-bundle]
+npm ERR! [-E|--save-exact] [-g|--global] [--install-strategy <hoisted|nested|shallow>]
+npm ERR! [--legacy-bundling] [--global-style]
+npm ERR! [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+npm ERR! [--strict-peer-deps] [--no-package-lock] [--foreground-scripts]
+npm ERR! [--ignore-scripts] [--no-audit] [--no-bin-links] [--no-fund] [--dry-run]
+npm ERR! [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+npm ERR! [-ws|--workspaces] [--include-workspace-root] [--no-install-links]
+npm ERR! 
+npm ERR! aliases: clean-install, ic, install-clean, isntall-clean
+npm ERR! 
+npm ERR! Run "npm help ci" for more info
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/kali/.npm/_logs/2026-01-17T16_06_04_590Z-debug-0.log
